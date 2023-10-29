@@ -1,6 +1,5 @@
 import { type NextApiRequest, type NextApiResponse } from "next";
-import { pusher } from "@/libs/pusher/server";
-import { PrismaClient } from "@prisma/client";
+import Pusher from "pusher";
 
 export type RequestBodyPusher = {
   choose: string;
@@ -10,6 +9,16 @@ export type RequestBodyPusher = {
   user_image_url: string;
   id: string;
 };
+
+const pusher = new Pusher({
+  appId: process.env.SOKETI_DEFAULT_APP_ID!,
+  secret: process.env.SOKETI_DEFAULT_APP_SECRET!,
+  key: process.env.NEXT_PUBLIC_PUSHER_KEY!,
+  cluster: "" as string,
+  host: process.env.NEXT_PUBLIC_SOKETI_URL!,
+  port: process.env.NEXT_PUBLIC_SOKETI_PORT!,
+});
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
@@ -18,23 +27,7 @@ export default async function handler(
 
   const { username, choose, roomId, voted, user_image_url, id } =
     req.body as RequestBodyPusher;
-  // const prisma = new PrismaClient();
   try {
-    // await prisma.votes.create({
-    //   data: {
-    //     value: choose,
-    //     user: {
-    //       connect: {
-    //         id: id,
-    //       },
-    //     },
-    //     room: {
-    //       connect: {
-    //         id: roomId,
-    //       },
-    //     },
-    //   },
-    // });
     await pusher.trigger(`presence-room-${roomId}`, "vote", {
       username,
       choose,
