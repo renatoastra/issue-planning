@@ -9,7 +9,7 @@ import DiscordProvider from "next-auth/providers/discord";
 
 import { env } from "@/env.mjs";
 import { db } from "@/server/db";
-
+const scopes = ["identify", "email"];
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
  * object and keep type safety.
@@ -51,6 +51,7 @@ export const authOptions: NextAuthOptions = {
     DiscordProvider({
       clientId: env.DISCORD_CLIENT_ID,
       clientSecret: env.DISCORD_CLIENT_SECRET,
+      authorization: { params: { scope: scopes.join(" ") } },
     }),
     /**
      * ...add more providers here.
