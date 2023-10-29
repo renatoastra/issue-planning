@@ -27,17 +27,12 @@ export default async function handler(
 
   const { username, choose, roomId, voted, user_image_url, id } =
     req.body as RequestBodyPusher;
-  try {
-    await pusher.trigger(`presence-room-${roomId}`, "vote", {
-      username,
-      choose,
-      voted,
-      user_image_url,
-      id,
-    });
-    res.send({ message: "success" });
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: err });
-  }
+  await pusher.trigger(`presence-room-${roomId}`, "vote", {
+    username,
+    choose,
+    voted,
+    user_image_url,
+    id,
+  });
+  res.send({ message: "success" });
 }
