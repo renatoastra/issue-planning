@@ -35,7 +35,7 @@ export default async function handler(
       user_image_url,
       id,
     });
-    res.json({ message: "success" });
+    res.status(200).json({ message: "success" });
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: err });

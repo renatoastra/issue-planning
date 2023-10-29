@@ -15,7 +15,7 @@ export default async function handler(
     await pusher.trigger(`presence-room-${roomId}`, "reveal-vote", {
       roomId,
     });
-    res.json({ message: "success" });
+    res.status(200).json({ message: "success" });
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: err });
