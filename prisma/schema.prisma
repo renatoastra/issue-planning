@@ -60,7 +60,9 @@ model VerificationToken {
 
 model Room {
     id                String  @id @default(cuid())
-    planning    String?
+    title String?
+    link String?
+    description    String?
     createdAt   DateTime @default(now())
     status      String?
     createdById String

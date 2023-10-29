@@ -18,23 +18,23 @@ export default async function handler(
 
   const { username, choose, roomId, voted, user_image_url, id } =
     req.body as RequestBodyPusher;
-  const prisma = new PrismaClient();
+  // const prisma = new PrismaClient();
   try {
-    await prisma.votes.create({
-      data: {
-        value: choose,
-        user: {
-          connect: {
-            id: id,
-          },
-        },
-        room: {
-          connect: {
-            id: roomId,
-          },
-        },
-      },
-    });
+    // await prisma.votes.create({
+    //   data: {
+    //     value: choose,
+    //     user: {
+    //       connect: {
+    //         id: id,
+    //       },
+    //     },
+    //     room: {
+    //       connect: {
+    //         id: roomId,
+    //       },
+    //     },
+    //   },
+    // });
     await pusher.trigger(`presence-room-${roomId}`, "vote", {
       username,
       choose,

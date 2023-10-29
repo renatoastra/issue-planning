@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
 import { UserAvatar } from "@/components/Avatar";
 import { VoteCard } from "@/components/VoteCard";
 import { UserDialog } from "@/components/Dialog";
@@ -5,28 +6,28 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { usePusher } from "@/hooks/use-pusher/usePusher";
 import { PrismaClient } from "@prisma/client";
-import { Crown } from "lucide-react";
+import { Crown, Link } from "lucide-react";
 import { type GetServerSidePropsContext } from "next";
 import { useSession } from "next-auth/react";
-import { ResultChart } from "@/components/Charts/Vertical";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import { ROOM_STATUS } from "@/enum/status";
 import { VotedSection } from "../view/VotedSection";
-import error from "next/error";
+import { Input } from "@/components/ui/input";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard/useCopyToClipboard";
 
 type PageProps = {
   roomId: string;
   userId: string;
-  planning: string;
+  description: string;
   status: string;
+  title: string;
+  link: string;
 };
 
 export const getServerSideProps = async (
   context: GetServerSidePropsContext,
 ) => {
   const roomId = context.query.roomId;
-
   const prisma = new PrismaClient();
   const query = await prisma.room.findFirst({
     where: {
@@ -34,8 +35,10 @@ export const getServerSideProps = async (
     },
     select: {
       createdById: true,
-      planning: true,
+      description: true,
       status: true,
+      title: true,
+      link: true,
     },
   });
 
@@ -48,13 +51,15 @@ export const getServerSideProps = async (
     props: {
       roomId,
       userId: query.createdById,
-      planning: query.planning,
+      description: query.description,
       status: query.status,
+      title: query.title,
+      link: query.link,
     },
   };
 };
 
-const Page = ({ roomId, userId, planning }: PageProps) => {
+const Page = ({ roomId, userId, description, link, title }: PageProps) => {
   const { data } = useSession();
   const {
     usersInRoom,
@@ -63,30 +68,13 @@ const Page = ({ roomId, userId, planning }: PageProps) => {
     getRoom,
     mutateRoomStatus,
     step,
+    mutateCreateVote,
+    handleResetVote,
   } = usePusher({ roomId });
-
-  const handleVote = async (type: string) => {
-    try {
-      const payload = {
-        id: data?.user.id,
-        username: data?.user.name,
-        user_image_url: data?.user.image,
-        choose: type,
-        roomId: roomId,
-        voted: true,
-      };
-
-      await fetch("/api/vote", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  const [value, copy] = useCopyToClipboard();
 
   const roomOwner = userId === data?.user.id;
+
   return (
     <>
       <div className="relative flex h-full w-full  items-center  ">
@@ -116,13 +104,39 @@ const Page = ({ roomId, userId, planning }: PageProps) => {
           </div>
         </div>
         <div className="flex h-full  w-[calc(100%-12.23rem)] flex-col   items-center justify-between  gap-6  xl:w-[calc(100%-18rem)]">
-          <div className="flex h-full flex-col justify-between py-16 xl:w-[38rem]">
+          <div className="flex h-full flex-col justify-between py-8 xl:w-[38rem]">
             <div className="flex flex-col gap-8">
-              <h3 className="text-3xl">Assunto a ser discutido:</h3>
+              <div className="flex w-full flex-col  gap-2">
+                <h3 className="flex items-center gap-2 text-xl font-bold">
+                  Titulo
+                </h3>
+                <Input
+                  disabled
+                  className="w-full bg-primary-foreground"
+                  value={title}
+                />
+              </div>
+
+              <div className="flex w-full flex-col  gap-2">
+                <h3
+                  onClick={() => copy(link)}
+                  className="flex cursor-pointer items-center gap-2 text-xl font-bold"
+                  title="Copiar link"
+                >
+                  Link
+                  <Link />
+                </h3>
+                <Input
+                  disabled
+                  className="w-full bg-primary-foreground"
+                  value={link}
+                />
+              </div>
+
               <Textarea
                 className="h-38 w-full resize-none bg-primary-foreground"
                 disabled
-                value={planning}
+                value={description}
               />
 
               {roomOwner && (
@@ -150,9 +164,7 @@ const Page = ({ roomId, userId, planning }: PageProps) => {
                         <Button
                           className="mb-4 w-[200px] cursor-pointer"
                           disabled={!allUsersVoted}
-                          onClick={async () =>
-                            mutateRoomStatus(ROOM_STATUS.VOTING, "reset-vote")
-                          }
+                          onClick={async () => handleResetVote()}
                         >
                           Resetar votos
                         </Button>
@@ -191,42 +203,34 @@ const Page = ({ roomId, userId, planning }: PageProps) => {
               </>
             ) : (
               <>
-                {getMyVote?.voted && step === ROOM_STATUS.VOTING && (
-                  <div className="flex gap-8 self-center ">
+                {step === ROOM_STATUS.VOTING && (
+                  <div className="flex gap-8 justify-self-end ">
                     <VoteCard
-                      onClick={() => console.log("XD")}
-                      title={getMyVote?.choose ?? ""}
-                      description="Meu voto"
+                      onClick={() => mutateCreateVote("PP")}
+                      title="PP"
+                      description="P de"
+                      currentChoice={getMyVote?.choose === "PP"}
+                    />
+                    <VoteCard
+                      onClick={() => mutateCreateVote("P")}
+                      title="P"
+                      description="P de"
+                      currentChoice={getMyVote?.choose === "P"}
+                    />
+                    <VoteCard
+                      onClick={() => mutateCreateVote("M")}
+                      title="M"
+                      description="P de"
+                      currentChoice={getMyVote?.choose === "M"}
+                    />
+                    <VoteCard
+                      onClick={() => mutateCreateVote("G")}
+                      title="G"
+                      description="P de"
+                      currentChoice={getMyVote?.choose === "G"}
                     />
                   </div>
                 )}
-
-                {!getMyVote?.voted &&
-                  !allUsersVoted &&
-                  step === ROOM_STATUS.VOTING && (
-                    <div className="flex gap-8 justify-self-end ">
-                      <VoteCard
-                        onClick={() => handleVote("PP")}
-                        title="PP"
-                        description="P de"
-                      />
-                      <VoteCard
-                        onClick={() => handleVote("P")}
-                        title="P"
-                        description="P de"
-                      />
-                      <VoteCard
-                        onClick={() => handleVote("M")}
-                        title="M"
-                        description="P de"
-                      />
-                      <VoteCard
-                        onClick={() => handleVote("G")}
-                        title="G"
-                        description="P de"
-                      />
-                    </div>
-                  )}
               </>
             )}
           </div>

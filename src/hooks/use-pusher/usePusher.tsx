@@ -11,6 +11,7 @@ Pusher.logToConsole = true;
 interface UsePusherProps {
   roomId: string;
 }
+
 export const usePusher = ({ roomId }: UsePusherProps) => {
   const pusherRef = useRef<Pusher>();
   const { data } = useSession();
@@ -22,14 +23,12 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
       id: roomId,
     });
 
-  const { data: getVoteByUser, refetch } = api.room.getVoteByUser.useQuery({
+  const { data: getVoteByUser } = api.room.getVoteByUser.useQuery({
     roomId,
   });
   const { mutateAsync: onChangeStatus } = api.room.changeRoomStatus.useMutation(
     {
-      onSuccess: async (data) => {
-        setStep(data.status);
-        await refetch();
+      onSuccess: async () => {
         await getRoomRefetch();
       },
     },
@@ -37,9 +36,108 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
 
   const getMyVote = usersInRoom.find((user) => user.id === data?.user.id);
 
+  const pusher = pusherRef.current;
+  const allUsersVoted = usersInRoom.every((user) => user.voted);
+
+  const handleResetVote = async () => {
+    await mutateRoomStatus(ROOM_STATUS.VOTING, "reset-vote");
+
+    try {
+      const payload = {
+        choose: null,
+        roomId: roomId,
+        voted: false,
+      };
+      await fetch("/api/reset-vote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    if (!getRoom) return;
+    switch (getRoom.status) {
+      case ROOM_STATUS.VOTING:
+        setStep(ROOM_STATUS.VOTING);
+        break;
+      case ROOM_STATUS.VOTED:
+        setStep(ROOM_STATUS.VOTED);
+        break;
+      case ROOM_STATUS.CLOSED:
+        setStep(ROOM_STATUS.CLOSED);
+        break;
+      default:
+        break;
+    }
+  }, [getRoom]);
+  const handleRevealVote = async () => {
+    try {
+      const payload = {
+        roomId: roomId,
+      };
+      await fetch("/api/reveal-vote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleVote = async (type: string) => {
+    try {
+      const payload = {
+        id: data?.user.id,
+        username: data?.user.name,
+        user_image_url: data?.user.image,
+        choose: type,
+        roomId: roomId,
+        voted: true,
+      };
+
+      localStorage.setItem(`${roomId}-vote`, type);
+      await fetch("/api/vote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const mutateCreateVote = async (type: string) => {
+    await handleVote(type);
+  };
+
+  const mutateRoomStatus = async (
+    status: ROOM_STATUS,
+    type: "reveal-vote" | "reset-vote",
+  ) => {
+    try {
+      await onChangeStatus({
+        roomId,
+        status,
+        type,
+      });
+
+      if (type === "reveal-vote") {
+        await handleRevealVote();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     if (!data?.user.id) return;
     let mounted = true;
+    const storageVote = localStorage.getItem(`${roomId}-vote`);
     if (mounted) {
       pusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
         cluster: "",
@@ -55,8 +153,8 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
             username: data.user.name,
             id: data.user.id,
             image: data.user.image,
-            voted: getMyVote?.voted ?? false,
-            choose: getMyVote?.choose ?? null,
+            voted: storageVote ? true : false,
+            choose: storageVote,
           },
         },
       });
@@ -84,18 +182,13 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
         });
         setUsersInRoom(users);
 
-        channel.bind("vote", async (userVote: UserVoted) => {
-          const userHasAlreadyVoted = users.find(
-            (user) => user.id === userVote.id,
-          );
-          if (userHasAlreadyVoted?.voted) return;
-
+        channel.bind("vote", (userVote: UserVoted) => {
           setUsersInRoom((prev) => {
             return prev.map((user) => {
               if (user.id === userVote.id) {
                 return {
                   ...user,
-                  voted: true,
+                  voted: userVote.voted,
                   choose: userVote.choose,
                 };
               }
@@ -103,15 +196,25 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
             });
           });
         });
-        channel.bind(
-          "reveal-vote",
-          async ({ status, roomId }: { status: string; roomId: string }) => {
-            setStep(ROOM_STATUS.VOTED);
-          },
-        );
       },
     );
+    channel.bind("reset-vote", ({}: { status: string; roomId: string }) => {
+      localStorage.removeItem(`${roomId}-vote`);
+      setUsersInRoom((prev) => {
+        return prev.map((user) => {
+          return {
+            ...user,
+            voted: false,
+            choose: null,
+          };
+        });
+      });
+      setStep(ROOM_STATUS.VOTING);
+    });
 
+    channel.bind("reveal-vote", () => {
+      setStep(ROOM_STATUS.VOTED);
+    });
     channel.bind(
       "pusher:member_removed",
       function (member: RemovedMemberResponse) {
@@ -132,57 +235,17 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
       channel.unsubscribe();
       channel.unbind("pusher:subscription_succeeded");
     };
-  }, [
-    roomId,
-    data,
-    getVoteByUser,
-    getMyVote?.voted,
-    getMyVote?.choose,
-    getRoomRefetch,
-  ]);
-  const pusher = pusherRef.current;
-  const allUsersVoted = usersInRoom.every((user) => user.voted);
+  }, [roomId, data, getVoteByUser, getRoomRefetch]);
 
-  useEffect(() => {
-    if (!getRoom) return;
-    switch (getRoom.status) {
-      case ROOM_STATUS.VOTING:
-        setStep(ROOM_STATUS.VOTING);
-        break;
-      case ROOM_STATUS.VOTED:
-        setStep(ROOM_STATUS.VOTED);
-        break;
-      case ROOM_STATUS.CLOSED:
-        setStep(ROOM_STATUS.CLOSED);
-        break;
-      default:
-        break;
-    }
-  }, [getRoom, step]);
-
-  const mutateRoomStatus = async (
-    status: ROOM_STATUS,
-    type: "reveal-vote" | "reset-vote",
-  ) => {
-    try {
-      await onChangeStatus({
-        roomId,
-        status,
-        type,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  console.log("🚀 ~ allUsersVoted:", allUsersVoted);
-  console.log("🚀 ~ getMyVote:", getMyVote);
   return {
     pusher,
     usersInRoom,
     allUsersVoted,
     getMyVote,
+    mutateCreateVote,
     getRoom,
     mutateRoomStatus,
+    handleResetVote,
     step,
   };
 };

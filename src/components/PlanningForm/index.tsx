@@ -27,10 +27,21 @@ export const PlanningForm = ({ children, onSubmit }: PlanningFormProps) => {
           </DialogTitle>
           <DialogDescription className="w-full ">
             <form onSubmit={onSubmit} className="flex w-full flex-col gap-6">
+              <Input
+                id="planning-title"
+                name="planning-title"
+                placeholder="Título"
+              />
+              <Input
+                id="planning-link"
+                name="planning-link"
+                placeholder="Link"
+              />
               <Textarea
                 id="planning-form"
                 name="planning-form"
                 className="h-32 resize-none"
+                placeholder="Descrição"
               />
               <Button type="submit">Criar</Button>
             </form>

@@ -1,9 +1,8 @@
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import Head from "next/head";
 
 import { api } from "@/utils/api";
 import { useRouter } from "next/router";
-import { useState } from "react";
 import { ArrowBigRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PlanningForm } from "@/components/PlanningForm";
@@ -12,25 +11,48 @@ import { toast } from "react-toastify";
 export default function Home() {
   const { data } = useSession();
   const router = useRouter();
-  const [planning, setPlanning] = useState("");
 
   const { mutateAsync } = api.room.create.useMutation({
-    onSuccess(data, variables, context) {
-      router.push(`/room/${data.id}`);
+    async onSuccess(data, variables, context) {
+      await router.push(`/room/${data?.id}`);
     },
   });
 
   const handleCreateRoom = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const input = event.currentTarget.elements.namedItem(
+
+    const description = event.currentTarget.elements.namedItem(
       "planning-form",
     ) as HTMLInputElement | null;
-    if (!input?.value || !input.value) {
-      toast.error("Digite o nome da sala");
+
+    const title = event.currentTarget.elements.namedItem(
+      "planning-title",
+    ) as HTMLInputElement | null;
+
+    const link = event.currentTarget.elements.namedItem(
+      "planning-link",
+    ) as HTMLInputElement | null;
+    if (!description?.value || !description.value) {
+      toast.error("Digite o nome da issue");
+      return;
     }
-    const value = input.value;
+
+    if (!title?.value || !title.value) {
+      toast.error("Digite o título da issue");
+      return;
+    }
+
+    if (!link?.value || !link.value) {
+      toast.error("Digite o link da issue");
+      return;
+    }
+
     try {
-      await mutateAsync({ planning: value });
+      await mutateAsync({
+        description: description.value,
+        title: title.value,
+        link: link.value,
+      });
     } catch (e) {
       console.log(e);
     }
@@ -54,6 +76,8 @@ export default function Home() {
         )}
 
         {data && (
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
           <PlanningForm onSubmit={handleCreateRoom}>
             <Button className="w-60" variant="default">
               Create room
