@@ -51,6 +51,7 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
       await fetch("/api/reset-vote", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+
         body: JSON.stringify(payload),
       });
     } catch (error) {
@@ -147,7 +148,10 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
         disableStats: true,
         enabledTransports: ["ws", "wss"],
         authEndpoint: "/api/pusher",
-
+        userAuthentication: {
+          endpoint: "/api/pusher",
+          transport: "ajax",
+        },
         auth: {
           params: {
             username: data.user.name,
