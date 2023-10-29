@@ -8,7 +8,7 @@ type ChannelAuth = {
   image: string;
   id: string;
   choose: string | null;
-  voted: boolean;
+  voted: string;
 };
 
 const handler = (req: NextApiRequest, res: NextApiResponse) => {

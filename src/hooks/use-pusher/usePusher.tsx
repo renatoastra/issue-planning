@@ -1,4 +1,3 @@
-import { type UserVoted, type UsersInRoom } from "@/pages/room/[roomId]/types";
 import { type MembersResponse } from "@/types/members";
 import { useSession } from "next-auth/react";
 import Pusher from "pusher-js";
@@ -6,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { type RemovedMemberResponse, type AddedMemberResponse } from "./types";
 import { api } from "@/utils/api";
 import { ROOM_STATUS } from "@/enum/status";
+import { type UsersInRoom, type UserVoted } from "@/types/users-in-room";
 
 Pusher.logToConsole = true;
 interface UsePusherProps {

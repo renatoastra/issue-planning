@@ -11,7 +11,7 @@ import { type GetServerSidePropsContext } from "next";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { ROOM_STATUS } from "@/enum/status";
-import { VotedSection } from "../view/VotedSection";
+import { VotedSection } from "../../../view/VotedSection";
 import { Input } from "@/components/ui/input";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard/useCopyToClipboard";
 
