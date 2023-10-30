@@ -142,8 +142,6 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
     if (mounted) {
       pusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
         cluster: process.env.NEXT_PUBLIC_SOKETI_CLUSTER!,
-        wsHost: process.env.NEXT_PUBLIC_SOKETI_URL!,
-        wsPort: Number(process.env.NEXT_PUBLIC_SOKETI_PORT),
         forceTLS: false,
         disableStats: true,
         enabledTransports: ["ws", "wss"],
