@@ -16,17 +16,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { username, choose, roomId, voted, user_image_url, id } =
     req.body as RequestBodyPusher;
   try {
-    // const response = await pusher.trigger(`presence-room-${roomId}`, "vote", {
-    //   username,
-    //   choose,
-    //   voted,
-    //   user_image_url,
-    //   id,
-    // });
-    const response = await pusher.sendToUser(id, "vote", {
-      username: username,
+    const response = await pusher.trigger(`presence-room-${roomId}`, "vote", {
+      username,
+      choose,
+      voted,
+      user_image_url,
+      id,
     });
-    console.log(response);
   } catch (e) {
     console.log(e);
   }
