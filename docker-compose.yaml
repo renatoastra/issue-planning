@@ -1,0 +1,15 @@
+version: "3.9"
+services:
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - /app/node_modules
+      - .:/app
+  soketi:
+    image: "quay.io/soketi/soketi:latest-16-alpine"
+    ports:
+      - "6001:6001"

@@ -8,15 +8,21 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
+import { RotatingLines } from "react-loader-spinner";
 
 interface PlanningFormProps {
   children: React.ReactNode;
   onSubmit: () => void;
+  loading?: boolean;
 }
-export const PlanningForm = ({ children, onSubmit }: PlanningFormProps) => {
+export const PlanningForm = ({
+  children,
+  onSubmit,
+  loading,
+}: PlanningFormProps) => {
   return (
     <Dialog>
       <DialogTrigger>{children}</DialogTrigger>
@@ -43,7 +49,19 @@ export const PlanningForm = ({ children, onSubmit }: PlanningFormProps) => {
                 className="h-32 resize-none"
                 placeholder="Descrição"
               />
-              <Button type="submit">Criar</Button>
+              <Button disabled={loading} type="submit">
+                {loading ? (
+                  <RotatingLines
+                    strokeColor="grey"
+                    strokeWidth="5"
+                    animationDuration="0.75"
+                    width="26"
+                    visible={true}
+                  />
+                ) : (
+                  "Criar"
+                )}
+              </Button>
             </form>
           </DialogDescription>
         </DialogHeader>

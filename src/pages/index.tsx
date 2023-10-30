@@ -7,6 +7,7 @@ import { ArrowBigRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PlanningForm } from "@/components/PlanningForm";
 import { toast } from "react-toastify";
+import { useState } from "react";
 
 export default function Home() {
   const { data } = useSession();
@@ -17,6 +18,7 @@ export default function Home() {
       await router.push(`/room/${data?.id}`);
     },
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleCreateRoom = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -46,6 +48,7 @@ export default function Home() {
       toast.error("Digite o link da issue");
       return;
     }
+    setIsLoading(true);
 
     try {
       await mutateAsync({
@@ -55,6 +58,8 @@ export default function Home() {
       });
     } catch (e) {
       console.log(e);
+    } finally {
+      setIsLoading(false);
     }
   };
   return (
@@ -78,7 +83,7 @@ export default function Home() {
         {data && (
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
-          <PlanningForm onSubmit={handleCreateRoom}>
+          <PlanningForm loading={isLoading} onSubmit={handleCreateRoom}>
             <Button className="w-60" variant="default">
               Create room
               <ArrowBigRight size={25} />
