@@ -27,12 +27,18 @@ export default async function handler(
 
   const { username, choose, roomId, voted, user_image_url, id } =
     req.body as RequestBodyPusher;
-  await pusher.trigger(`presence-room-${roomId}`, "vote", {
-    username,
-    choose,
-    voted,
-    user_image_url,
-    id,
-  });
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    pusher.trigger(`presence-room-${roomId}`, "vote", {
+      username,
+      choose,
+      voted,
+      user_image_url,
+      id,
+    });
+  } catch (err) {
+    console.log(err);
+  }
+
   res.send({ message: "success" });
 }
