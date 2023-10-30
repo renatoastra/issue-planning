@@ -7,7 +7,7 @@ import { api } from "@/utils/api";
 import { ROOM_STATUS } from "@/enum/status";
 import { type UsersInRoom, type UserVoted } from "@/types/users-in-room";
 
-Pusher.logToConsole = true;
+Pusher.logToConsole = false;
 interface UsePusherProps {
   roomId: string;
 }
