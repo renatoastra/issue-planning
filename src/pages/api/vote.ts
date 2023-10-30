@@ -19,6 +19,7 @@ const pusher = new Pusher({
   port: process.env.NEXT_PUBLIC_SOKETI_PORT!,
 });
 
+// eslint-disable-next-line @typescript-eslint/require-await
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
