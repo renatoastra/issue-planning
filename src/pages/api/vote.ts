@@ -19,7 +19,6 @@ const pusher = new Pusher({
   port: process.env.NEXT_PUBLIC_SOKETI_PORT!,
 });
 
-// eslint-disable-next-line @typescript-eslint/require-await
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
@@ -28,18 +27,12 @@ export default async function handler(
 
   const { username, choose, roomId, voted, user_image_url, id } =
     req.body as RequestBodyPusher;
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    pusher.trigger(`presence-room-${roomId}`, "vote", {
-      username,
-      choose,
-      voted,
-      user_image_url,
-      id,
-    });
-  } catch (err) {
-    console.log(err);
-  }
-
+  await pusher.trigger(`presence-room-${roomId}`, "vote", {
+    username,
+    choose,
+    voted,
+    user_image_url,
+    id,
+  });
   res.send({ message: "success" });
 }
