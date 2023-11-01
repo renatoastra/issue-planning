@@ -1,6 +1,6 @@
 import { useSession } from "next-auth/react";
 import Pusher from "pusher-js";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   type RemovedMemberResponse,
   type AddedMemberResponse,
@@ -9,9 +9,7 @@ import {
 import { api } from "@/utils/api";
 import { ROOM_STATUS } from "@/enum/status";
 import { type UsersInRoom, type UserVoted } from "@/types/users-in-room";
-import { VoteResultContext } from "@/context/vote-result";
 import { type MembersResponse } from "@/types/members";
-import channel from "pusher-js/types/src/core/channels/channel";
 
 Pusher.logToConsole = true;
 interface UsePusherProps {
@@ -46,7 +44,7 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
 
   const pusher = pusherRef.current;
   const allUsersVoted =
-    usersInRoom.every((user) => user.voted) || step === "voted";
+    usersInRoom.every((user) => user?.voted) || step === "voted";
 
   const handleResetVote = async () => {
     try {
@@ -137,7 +135,7 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
       //@ts-ignore
       localStorage.getItem(`${roomId}-vote`),
     ) as UsersInRoom[];
-    const storageVote = localStorage.getItem(`${roomId}-vote`);
+
     if (mounted) {
       pusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
         cluster: process.env.NEXT_PUBLIC_SOKETI_CLUSTER!,
@@ -161,7 +159,6 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
               false,
             choose:
               storageData?.find((user) => user.id === data.user.id)?.choose ??
-              storageVote ??
               null,
           },
         },
@@ -237,16 +234,20 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
         (user) => user.id === member.info.id,
       );
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //@ts-ignore
-      member.info && setUsersInRoom((prev) => [...prev, currentUser]);
+      if (currentUser) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        //@ts-ignore
+        member.info && setUsersInRoom((prev) => [...prev, currentUser]);
+      } else {
+        member.info && setUsersInRoom((prev) => [...prev, member.info]);
+      }
     });
     return () => {
       pusherRef.current?.disconnect();
       mounted = false;
       channel.unsubscribe();
     };
-  }, [roomId, data, step]);
+  }, [roomId, data]);
 
   const handleCreateVote = async (choose: string) => {
     if (cardIsLoading) return;
