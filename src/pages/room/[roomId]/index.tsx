@@ -100,14 +100,14 @@ const Page = ({ roomId, userId, description, link, title }: PageProps) => {
                   fallback={user?.username ?? ""}
                 />
                 <div className=" flex items-center justify-center gap-3 ">
-                  <p className="hidden lg:block">{user.username}</p>
-                  {userId === user.id && (
+                  <p className="hidden lg:block">{user?.username}</p>
+                  {userId === user?.id && (
                     <div title="Room leader" className="">
                       <span className="text-xl">👑</span>
                     </div>
                   )}
                 </div>
-                <Checkbox disabled checked={user.voted} />
+                <Checkbox disabled checked={user?.voted} />
               </div>
             ))}
           </div>
@@ -217,7 +217,7 @@ const Page = ({ roomId, userId, description, link, title }: PageProps) => {
             </div>
             {step === ROOM_STATUS.VOTED ? (
               <div className="flex h-52  w-full items-center justify-center xl:h-80">
-                <VotedSection usersInRoom={usersInRoom} />
+                <VotedSection roomId={roomId} usersInRoom={usersInRoom} />
               </div>
             ) : (
               <>

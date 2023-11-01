@@ -33,15 +33,26 @@ export const options = {
   },
 };
 
-const labels = ["PP", "P", "M", "G"];
+const labels = ["PP", "P", "M", "G", "GG"];
 
 interface ResultChartProps {
   usersInRoom: UsersInRoom[];
+  roomId: string;
 }
 
-export function ResultChart({ usersInRoom }: ResultChartProps) {
+export function ResultChart({ usersInRoom, roomId }: ResultChartProps) {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const localStorageUsers = JSON.parse(
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //@ts-ignore
+    window.localStorage.getItem(`${roomId}-vote`),
+  );
   const getVotesByType = (type: string) => {
-    return usersInRoom?.filter((user) => user.choose === type);
+    console.log("🚀 ~ localStorage:", localStorageUsers);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    return localStorageUsers?.filter(
+      (user: UsersInRoom) => user.choose === type,
+    ) as UsersInRoom[];
   };
 
   const data = () => {

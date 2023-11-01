@@ -50,7 +50,6 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
 
   const handleResetVote = async () => {
     try {
-      setIsLoading(true);
       const payload = {
         choose: null,
         roomId: roomId,
@@ -69,7 +68,6 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
     } catch (error) {
       console.log(error);
     } finally {
-      setIsLoading(false);
     }
   };
 
@@ -227,7 +225,7 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
       function (member: RemovedMemberResponse) {
         member.info &&
           setUsersInRoom((prev) => {
-            return prev.filter((user) => user.id !== member.info.id);
+            return prev.filter((user) => user?.id !== member.info.id);
           });
       },
     );

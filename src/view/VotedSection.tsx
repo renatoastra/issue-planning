@@ -5,13 +5,12 @@ import { type UsersInRoom } from "@/types/users-in-room";
 import { useCallback, useContext } from "react";
 interface VotedSectionProps {
   usersInRoom: UsersInRoom[];
+  roomId: string;
 }
 
-export const VotedSection = ({ usersInRoom }: VotedSectionProps) => {
-  const { usersResult } = useContext(VoteResultContext);
-
+export const VotedSection = ({ usersInRoom, roomId }: VotedSectionProps) => {
   const Result = useCallback(() => {
-    return <ResultChart usersInRoom={usersInRoom} />;
-  }, [usersInRoom]);
+    return <ResultChart usersInRoom={usersInRoom} roomId={roomId} />;
+  }, [roomId, usersInRoom]);
   return Result();
 };
