@@ -184,6 +184,8 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
 
           return userVoted;
         });
+
+        localStorage.setItem(`${roomId}-vote`, JSON.stringify(users));
         setUsersInRoom(users);
       },
     );
