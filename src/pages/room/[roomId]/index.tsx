@@ -87,7 +87,7 @@ const Page = ({ roomId, userId, description, link, title }: PageProps) => {
   return (
     <>
       <div className="relative flex h-full w-full  items-center  ">
-        <div className="absolute right-0 h-full   overflow-y-auto border-l  border-l-secondary bg-primary-foreground xl:w-72   ">
+        <div className="absolute right-0 h-full   overflow-y-auto border-l  border-l-secondary bg-primary-foreground xl:w-56   ">
           <h1 className=" p-6 text-3xl font-bold">Usuários</h1>
           <div>
             {usersInRoom?.map((user, index) => (
