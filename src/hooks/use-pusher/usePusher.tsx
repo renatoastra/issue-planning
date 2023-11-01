@@ -237,9 +237,12 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
         (user) => user.id === member.info.id,
       );
 
+      if (currentUser) {
+        return setUsersInRoom((prev) => [...prev, currentUser]);
+      }
+
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       //@ts-ignore
-      member.info && setUsersInRoom((prev) => [...prev, currentUser]);
     });
     return () => {
       pusherRef.current?.disconnect();
