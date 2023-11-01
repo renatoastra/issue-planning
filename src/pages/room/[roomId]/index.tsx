@@ -11,7 +11,6 @@ import {
   ArrowRight,
   ArrowRightCircle,
   Link,
-  UserIcon,
 } from "lucide-react";
 import { type GetServerSidePropsContext } from "next";
 import { useSession } from "next-auth/react";
@@ -22,7 +21,6 @@ import { Input } from "@/components/ui/input";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard/useCopyToClipboard";
 import { LoadingSpinner } from "@/components/Loading";
 import { useState } from "react";
-import clsx from "clsx";
 
 type PageProps = {
   roomId: string;
@@ -89,62 +87,27 @@ const Page = ({ roomId, userId, description, link, title }: PageProps) => {
   return (
     <>
       <div className="relative flex h-full w-full  items-center  ">
-        <div
-          className={clsx(
-            `absolute right-0 h-full   overflow-y-auto border-l  border-l-secondary bg-primary-foreground transition-all 
-              duration-500 ease-in-out xl:w-72  `,
-            toggleSidebar ? "xl:w-40" : "w-0",
-          )}
-        >
-          <h1
-            className={`p-6 text-3xl font-bold transition-all duration-500 ease-in-out ${
-              toggleSidebar ? "" : ""
-            }`}
-          >
-            {toggleSidebar ? <UserIcon /> : "Usuarios"}
-          </h1>
-          <Button
-            onClick={() => setToggleSidebar((prev) => !prev)}
-            variant="ghost"
-            className="p-6 text-3xl font-bold transition-all duration-500 ease-in-out"
-          >
-            {toggleSidebar ? <ArrowLeftCircle /> : <ArrowRightCircle />}
-          </Button>
+        <div className="absolute right-0 h-full   overflow-y-auto border-l  border-l-secondary bg-primary-foreground xl:w-72   ">
+          <h1 className=" p-6 text-3xl font-bold">Usuários</h1>
           <div>
             {usersInRoom?.map((user, index) => (
               <div
                 key={index}
-                className={`flex ${
-                  toggleSidebar ? "gap-1" : "gap-3"
-                }  items-center justify-between gap-3 p-6 py-6 transition-all duration-500 ease-in-out hover:bg-secondary hover:bg-opacity-95 `}
+                className="flex items-center justify-between gap-3 p-6 py-6 hover:bg-secondary hover:bg-opacity-95"
               >
                 <UserAvatar
                   src={user?.user_image_url ?? ""}
                   fallback={user?.username ?? ""}
                 />
-                <div
-                  className={clsx(
-                    `flex  items-center justify-center gap-3`,
-                    toggleSidebar && "justify-center",
-                  )}
-                >
-                  <p
-                    className={`hidden lg:block ${
-                      toggleSidebar ? "text-[12px]" : ""
-                    }`}
-                  >
-                    {user.username}
-                  </p>
-                  {userId === user.id && !toggleSidebar && (
+                <div className=" flex items-center justify-center gap-3 ">
+                  <p className="hidden lg:block">{user.username}</p>
+                  {userId === user.id && (
                     <div title="Room leader" className="">
                       <span className="text-xl">👑</span>
                     </div>
                   )}
-
-                  {toggleSidebar && <Checkbox disabled checked={user.voted} />}
                 </div>
-
-                {!toggleSidebar && <Checkbox disabled checked={user.voted} />}
+                <Checkbox disabled checked={user.voted} />
               </div>
             ))}
           </div>
