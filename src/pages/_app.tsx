@@ -11,6 +11,7 @@ import "@/styles/globals.css";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Footer } from "@/components/Footer";
+import { VoteResultContextProvider } from "@/context/vote-result";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -19,12 +20,14 @@ const MyApp: AppType<{ session: Session | null }> = ({
   return (
     <SessionProvider session={session}>
       <ThemeProvider attribute="class" defaultTheme="dark">
-        <ToastContainer />
-        <Navbar />
-        <div className="h-[calc(100vh-137px)]">
-          <Component {...pageProps} />
-        </div>
-        <Footer />
+        <VoteResultContextProvider>
+          <ToastContainer />
+          <Navbar />
+          <div className="xl:h-[calc(100vh-137px)]">
+            <Component {...pageProps} />
+          </div>
+          <Footer />
+        </VoteResultContextProvider>
       </ThemeProvider>
     </SessionProvider>
   );

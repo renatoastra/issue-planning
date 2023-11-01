@@ -20,13 +20,19 @@ export const VoteCard = ({
   return (
     <Card
       onClick={onClick}
-      className={`h-44 w-32 cursor-pointer bg-primary-foreground ${
+      className={` h-44 w-32 max-w-[128px] cursor-pointer bg-primary-foreground ${
         currentChoice ? "bg-indigo-700 text-white" : ""
       }`}
     >
       <CardHeader className="w-full ">
         <CardTitle className="m-auto text-4xl">{title}</CardTitle>
-        <CardDescription className="m-auto">{description}</CardDescription>
+        <CardDescription
+          className={`m-auto w-full text-center  ${
+            currentChoice ? " text-white" : ""
+          }`}
+        >
+          {description}
+        </CardDescription>
       </CardHeader>
     </Card>
   );

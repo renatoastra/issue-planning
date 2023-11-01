@@ -6,6 +6,7 @@ import {
   publicProcedure,
 } from "@/server/api/trpc";
 import { ROOM_STATUS } from "@/enum/status";
+import { UsersInRoom } from "@/types/users-in-room";
 
 export const roomRouter = createTRPCRouter({
   create: protectedProcedure
@@ -58,7 +59,6 @@ export const roomRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const { roomId, value, userId } = input;
-      console.log("🚀 ~ input:", input);
 
       const query = await ctx.db.votes.create({
         data: {
@@ -87,33 +87,65 @@ export const roomRouter = createTRPCRouter({
           user: true,
         },
       });
-      return query;
+
+      const users = query.map((vote) => {
+        return {
+          id: vote.user.id,
+          username: vote.user.name,
+          choose: vote.value,
+          user_image_url: vote.user.image,
+          voted: true,
+        };
+      });
+      return users;
     }),
-  changeRoomStatus: protectedProcedure
+  revealRoom: protectedProcedure
     .input(
       z.object({
         roomId: z.string(),
         status: z.string(),
-        type: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { roomId, status, type } = input;
+      const { roomId, status } = input;
 
-      if (type === "reveal-vote") {
-        const query = await ctx.db.room.update({
-          where: {
-            id: roomId,
+      const query = await ctx.db.room.update({
+        where: {
+          id: roomId,
+        },
+        data: {
+          status,
+        },
+        include: {
+          votes: {
+            include: {
+              user: true,
+            },
           },
-          data: {
-            status,
-          },
-          select: {
-            status: true,
-          },
-        });
-        return query;
-      }
+        },
+      });
+
+      const users = query.votes.map((vote) => {
+        return {
+          id: vote.user.id,
+          username: vote.user.name,
+          choose: vote.value,
+          user_image_url: vote.user.image,
+          voted: true,
+        };
+      });
+      return users;
+    }),
+
+  resetRoom: protectedProcedure
+    .input(
+      z.object({
+        roomId: z.string(),
+        status: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { roomId, status } = input;
       const query = await ctx.db.room.update({
         where: {
           id: roomId,

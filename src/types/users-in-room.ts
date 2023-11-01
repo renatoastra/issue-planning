@@ -1,8 +1,8 @@
 export interface UsersInRoom {
   id: string;
-  username: string;
+  username: string | null;
   voted: boolean;
-  user_image_url: string;
+  user_image_url: string | null;
   choose: string | null;
 }
 

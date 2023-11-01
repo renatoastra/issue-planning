@@ -52,6 +52,7 @@ export function ResultChart({ usersInRoom }: ResultChartProps) {
           label: "Votos",
           data: labels.map((p) => getVotesByType(p).length),
           backgroundColor: "rgb(79, 70, 229)",
+          borderColor: "rgb(79, 70, 229)",
         },
       ],
     };

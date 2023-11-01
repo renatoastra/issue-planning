@@ -6,7 +6,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { usePusher } from "@/hooks/use-pusher/usePusher";
 import { PrismaClient } from "@prisma/client";
-import { Crown, Link } from "lucide-react";
+import {
+  ArrowLeftCircle,
+  ArrowRight,
+  ArrowRightCircle,
+  Link,
+  UserIcon,
+} from "lucide-react";
 import { type GetServerSidePropsContext } from "next";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -14,6 +20,9 @@ import { ROOM_STATUS } from "@/enum/status";
 import { VotedSection } from "../../../view/VotedSection";
 import { Input } from "@/components/ui/input";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard/useCopyToClipboard";
+import { LoadingSpinner } from "@/components/Loading";
+import { useState } from "react";
+import clsx from "clsx";
 
 type PageProps = {
   roomId: string;
@@ -61,6 +70,7 @@ export const getServerSideProps = async (
 
 const Page = ({ roomId, userId, description, link, title }: PageProps) => {
   const { data } = useSession();
+  const [toggleSidebar, setToggleSidebar] = useState(false);
   const {
     usersInRoom,
     allUsersVoted,
@@ -68,8 +78,9 @@ const Page = ({ roomId, userId, description, link, title }: PageProps) => {
     getRoom,
     mutateRoomStatus,
     step,
-    mutateCreateVote,
     handleResetVote,
+    isLoading,
+    handleCreateVote,
   } = usePusher({ roomId });
   const [value, copy] = useCopyToClipboard();
 
@@ -78,34 +89,69 @@ const Page = ({ roomId, userId, description, link, title }: PageProps) => {
   return (
     <>
       <div className="relative flex h-full w-full  items-center  ">
-        <div className="absolute right-0 h-full   overflow-y-auto border-l  border-l-secondary bg-primary-foreground xl:w-72   ">
-          <h1 className=" p-6 text-3xl font-bold">Usuários</h1>
+        <div
+          className={clsx(
+            `absolute right-0 h-full   overflow-y-auto border-l  border-l-secondary bg-primary-foreground transition-all 
+              duration-500 ease-in-out xl:w-72  `,
+            toggleSidebar ? "xl:w-40" : "w-0",
+          )}
+        >
+          <h1
+            className={`p-6 text-3xl font-bold transition-all duration-500 ease-in-out ${
+              toggleSidebar ? "" : ""
+            }`}
+          >
+            {toggleSidebar ? <UserIcon /> : "Usuarios"}
+          </h1>
+          <Button
+            onClick={() => setToggleSidebar((prev) => !prev)}
+            variant="ghost"
+            className="p-6 text-3xl font-bold transition-all duration-500 ease-in-out"
+          >
+            {toggleSidebar ? <ArrowLeftCircle /> : <ArrowRightCircle />}
+          </Button>
           <div>
             {usersInRoom?.map((user, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between gap-3 p-6 py-6 hover:bg-secondary hover:bg-opacity-95"
+                className={`flex ${
+                  toggleSidebar ? "gap-1" : "gap-3"
+                }  items-center justify-between gap-3 p-6 py-6 transition-all duration-500 ease-in-out hover:bg-secondary hover:bg-opacity-95 `}
               >
                 <UserAvatar
-                  src={user.user_image_url}
-                  fallback={user.username}
+                  src={user?.user_image_url ?? ""}
+                  fallback={user?.username ?? ""}
                 />
-                <div className=" flex items-center justify-center gap-3 ">
-                  <p className="hidden lg:block">{user.username}</p>
-                  {userId === user.id && (
+                <div
+                  className={clsx(
+                    `flex  items-center justify-center gap-3`,
+                    toggleSidebar && "justify-center",
+                  )}
+                >
+                  <p
+                    className={`hidden lg:block ${
+                      toggleSidebar ? "text-[12px]" : ""
+                    }`}
+                  >
+                    {user.username}
+                  </p>
+                  {userId === user.id && !toggleSidebar && (
                     <div title="Room leader" className="">
-                      <Crown strokeWidth={1.5} size={18} />
+                      <span className="text-xl">👑</span>
                     </div>
                   )}
+
+                  {toggleSidebar && <Checkbox disabled checked={user.voted} />}
                 </div>
-                <Checkbox disabled checked={user.voted} />
+
+                {!toggleSidebar && <Checkbox disabled checked={user.voted} />}
               </div>
             ))}
           </div>
         </div>
         <div className="flex h-full  w-[calc(100%-12.23rem)] flex-col   items-center justify-between  gap-6  xl:w-[calc(100%-18rem)]">
-          <div className="flex h-full flex-col justify-between py-8 xl:w-[38rem]">
-            <div className="flex flex-col gap-8">
+          <div className="flex h-full flex-col items-center justify-between py-8 xl:w-[58rem]">
+            <div className="flex w-full flex-col gap-8">
               <div className="flex w-full flex-col  gap-2">
                 <h3 className="flex items-center gap-2 text-xl font-bold">
                   Titulo
@@ -150,7 +196,10 @@ const Page = ({ roomId, userId, description, link, title }: PageProps) => {
                           mutateRoomStatus(ROOM_STATUS.VOTED, "reveal-vote")
                         }
                       >
-                        Revelar votos
+                        <LoadingSpinner
+                          text="Revelar votos"
+                          isLoading={isLoading}
+                        />
                       </Button>
                       <p className="text-xs text-primary">
                         Todos os usuarios devem ter votado antes
@@ -166,26 +215,32 @@ const Page = ({ roomId, userId, description, link, title }: PageProps) => {
                           disabled={!allUsersVoted}
                           onClick={async () => handleResetVote()}
                         >
-                          Resetar votos
+                          <LoadingSpinner
+                            text="Resetar votação"
+                            isLoading={isLoading}
+                          />
                         </Button>
                         <p className="text-xs text-primary">
                           Resetar todos os votos e voltar para votação
                         </p>
                       </div>
-                      <div>
+                      {/* <div>
                         <Button
                           className="mb-4 w-[200px] cursor-pointer"
                           disabled={!allUsersVoted}
                           onClick={async () =>
-                            mutateRoomStatus(ROOM_STATUS.CLOSED, "reveal-vote")
+                            mutateRoomStatus(ROOM_STATUS.CLOSED, "close-room")
                           }
                         >
-                          Fechar votação
+                          <LoadingSpinner
+                            text="Fechar votacão"
+                            isLoading={isLoading}
+                          />
                         </Button>
                         <p className="text-xs text-primary">
                           Finalizar a votação
                         </p>
-                      </div>
+                      </div> */}
                     </div>
                   )}
 
@@ -198,36 +253,42 @@ const Page = ({ roomId, userId, description, link, title }: PageProps) => {
               )}
             </div>
             {step === ROOM_STATUS.VOTED ? (
-              <>
+              <div className="flex h-52  w-full items-center justify-center xl:h-80">
                 <VotedSection usersInRoom={usersInRoom} />
-              </>
+              </div>
             ) : (
               <>
                 {step === ROOM_STATUS.VOTING && (
-                  <div className="flex gap-8 justify-self-end ">
+                  <div className="flex gap-4 justify-self-end ">
                     <VoteCard
-                      onClick={() => mutateCreateVote("PP")}
+                      onClick={() => handleCreateVote("PP")}
                       title="PP"
-                      description="P de"
+                      description="Ja ta pronto e testado"
                       currentChoice={getMyVote?.choose === "PP"}
                     />
                     <VoteCard
-                      onClick={() => mutateCreateVote("P")}
+                      onClick={() => handleCreateVote("P")}
                       title="P"
-                      description="P de"
+                      description="Faço de olhos fechados"
                       currentChoice={getMyVote?.choose === "P"}
                     />
                     <VoteCard
-                      onClick={() => mutateCreateVote("M")}
+                      onClick={() => handleCreateVote("M")}
                       title="M"
-                      description="P de"
+                      description="P com gordurinha"
                       currentChoice={getMyVote?.choose === "M"}
                     />
                     <VoteCard
-                      onClick={() => mutateCreateVote("G")}
+                      onClick={() => handleCreateVote("G")}
                       title="G"
-                      description="P de"
+                      description="Vai demorar"
                       currentChoice={getMyVote?.choose === "G"}
+                    />
+                    <VoteCard
+                      onClick={() => handleCreateVote("GG")}
+                      title="GG"
+                      description="Dificil para car#@#!@#"
+                      currentChoice={getMyVote?.choose === "GG"}
                     />
                   </div>
                 )}
