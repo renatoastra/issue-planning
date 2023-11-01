@@ -74,11 +74,11 @@ const Page = ({ roomId, userId, description, link, title }: PageProps) => {
     allUsersVoted,
     getMyVote,
     getRoom,
-    mutateRoomStatus,
     step,
     handleResetVote,
     isLoading,
     handleCreateVote,
+    handleRevealVote,
   } = usePusher({ roomId });
   const [value, copy] = useCopyToClipboard();
 
@@ -150,14 +150,12 @@ const Page = ({ roomId, userId, description, link, title }: PageProps) => {
 
               {roomOwner && (
                 <div className="flex flex-col gap-2">
-                  {getRoom?.status === ROOM_STATUS.VOTING && (
+                  {step === ROOM_STATUS.VOTING && (
                     <>
                       <Button
                         className="w-[200px] cursor-pointer"
                         disabled={!allUsersVoted}
-                        onClick={async () =>
-                          mutateRoomStatus(ROOM_STATUS.VOTED, "reveal-vote")
-                        }
+                        onClick={async () => handleRevealVote()}
                       >
                         <LoadingSpinner
                           text="Revelar votos"
@@ -170,7 +168,7 @@ const Page = ({ roomId, userId, description, link, title }: PageProps) => {
                     </>
                   )}
 
-                  {getRoom?.status === ROOM_STATUS.VOTED && (
+                  {step === ROOM_STATUS.VOTED && (
                     <div className="flex w-full items-center justify-between">
                       <div>
                         <Button

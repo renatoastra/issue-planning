@@ -27,3 +27,13 @@ export type VoteApiResponse = {
   id: string;
   users: UsersInRoom[];
 };
+
+export type RevealVotesResponse = {
+  roomId: string;
+  users: UsersInRoom[];
+};
+
+export type ResetRoomResponse = {
+  roomId: string;
+  users: UsersInRoom[];
+};

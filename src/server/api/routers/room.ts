@@ -116,25 +116,16 @@ export const roomRouter = createTRPCRouter({
         data: {
           status,
         },
-        include: {
-          votes: {
-            include: {
-              user: true,
-            },
-          },
+        select: {
+          status: true,
         },
       });
 
-      const users = query.votes.map((vote) => {
-        return {
-          id: vote.user.id,
-          username: vote.user.name,
-          choose: vote.value,
-          user_image_url: vote.user.image,
-          voted: true,
-        };
-      });
-      return users;
+      if (!query) {
+        throw new Error("Room not found");
+      }
+
+      return query;
     }),
 
   resetRoom: protectedProcedure
@@ -155,12 +146,6 @@ export const roomRouter = createTRPCRouter({
         },
         select: {
           status: true,
-        },
-      });
-
-      await ctx.db.votes.deleteMany({
-        where: {
-          roomId: roomId,
         },
       });
 

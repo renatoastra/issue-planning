@@ -5,6 +5,8 @@ import {
   type RemovedMemberResponse,
   type AddedMemberResponse,
   type VoteApiResponse,
+  type RevealVotesResponse,
+  type ResetRoomResponse,
 } from "./types";
 import { api } from "@/utils/api";
 import { ROOM_STATUS } from "@/enum/status";
@@ -28,17 +30,9 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
       id: roomId,
     });
 
-  const { mutateAsync: onRevealRoom } = api.room.revealRoom.useMutation({
-    onSuccess: async (data) => {
-      await getRoomRefetch();
-    },
-  });
+  const { mutateAsync: onRevealRoom } = api.room.revealRoom.useMutation({});
 
-  const { mutateAsync: onResetRoom } = api.room.resetRoom.useMutation({
-    onSuccess: async () => {
-      await getRoomRefetch();
-    },
-  });
+  const { mutateAsync: onResetRoom } = api.room.resetRoom.useMutation({});
 
   const getMyVote = usersInRoom.find((user) => user?.id === data?.user.id);
 
@@ -48,20 +42,21 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
 
   const handleResetVote = async () => {
     try {
+      await onResetRoom({
+        roomId,
+        status: ROOM_STATUS.VOTING,
+      });
       const payload = {
         choose: null,
         roomId: roomId,
         voted: false,
+        users: usersInRoom,
       };
       await fetch("/api/reset-vote", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
 
         body: JSON.stringify(payload),
-      });
-      await onResetRoom({
-        roomId,
-        status: ROOM_STATUS.VOTING,
       });
     } catch (error) {
       console.log(error);
@@ -88,6 +83,11 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
   const handleRevealVote = async () => {
     try {
       setIsLoading(true);
+
+      await onRevealRoom({
+        roomId,
+        status: ROOM_STATUS.VOTED,
+      });
       const payload = {
         roomId: roomId,
         users: usersInRoom,
@@ -96,28 +96,6 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      });
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const mutateRoomStatus = async (
-    status: ROOM_STATUS,
-    type: "reveal-vote" | "reset-vote",
-  ) => {
-    try {
-      setIsLoading(true);
-
-      if (type === "reveal-vote") {
-        await handleRevealVote();
-      }
-
-      await onRevealRoom({
-        roomId,
-        status,
       });
     } catch (error) {
       console.log(error);
@@ -194,29 +172,16 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
       localStorage.setItem(`${roomId}-vote`, json);
     });
 
-    channel.bind("reset-vote", ({}: { status: string; roomId: string }) => {
-      setUsersInRoom((prev) => {
-        return prev.map((user) => {
-          return {
-            ...user,
-            voted: false,
-            choose: null,
-          };
-        });
-      });
-      const userReseted = storageData.map((user) => {
-        return {
-          ...user,
-          voted: false,
-          choose: null,
-        };
-      });
+    channel.bind("reset-vote", ({ roomId, users }: ResetRoomResponse) => {
+      setUsersInRoom(users);
       setStep(ROOM_STATUS.VOTING);
-      const json = JSON.stringify(userReseted);
-      localStorage.setItem(`${roomId}-vote`, json);
+      localStorage.setItem(`${roomId}-vote`, JSON.stringify(users));
     });
 
-    channel.bind("reveal-vote", () => {
+    channel.bind("reveal-vote", ({ users }: RevealVotesResponse) => {
+      if (!users) return;
+      localStorage.setItem(`${roomId}-vote`, JSON.stringify(users));
+      setUsersInRoom(users);
       setStep(ROOM_STATUS.VOTED);
     });
     channel.bind(
@@ -282,10 +247,10 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
     getMyVote,
     handleCreateVote,
     getRoom,
-    mutateRoomStatus,
     handleResetVote,
     step,
     isLoading,
     cardIsLoading,
+    handleRevealVote,
   };
 };
