@@ -19,14 +19,13 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
   return (
     <SessionProvider session={session}>
-      <ThemeProvider attribute="class" defaultTheme="dark">
+      <ThemeProvider attribute="class" defaultTheme="light">
         <VoteResultContextProvider>
           <ToastContainer />
           <Navbar />
-          <div className="xl:h-[calc(100vh-137px)]">
+          <div className="xl:h-[calc(100vh-89px)]">
             <Component {...pageProps} />
           </div>
-          <Footer />
         </VoteResultContextProvider>
       </ThemeProvider>
     </SessionProvider>

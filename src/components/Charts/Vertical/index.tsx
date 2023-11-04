@@ -10,6 +10,7 @@ import {
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
 import { type UsersInRoom } from "@/types/users-in-room";
+import { type LocalStorageData } from "@/hooks/use-pusher/types";
 
 ChartJS.register(
   CategoryScale,
@@ -42,7 +43,7 @@ interface ResultChartProps {
 
 export function ResultChart({ usersInRoom, roomId }: ResultChartProps) {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const localStorageUsers = JSON.parse(
+  const localStorageUsers: LocalStorageData = JSON.parse(
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     window.localStorage.getItem(`${roomId}-vote`),
@@ -50,9 +51,9 @@ export function ResultChart({ usersInRoom, roomId }: ResultChartProps) {
   const getVotesByType = (type: string) => {
     console.log("🚀 ~ localStorage:", localStorageUsers);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-    return localStorageUsers?.filter(
+    return localStorageUsers?.users.filter(
       (user: UsersInRoom) => user.choose === type,
-    ) as UsersInRoom[];
+    );
   };
 
   const data = () => {

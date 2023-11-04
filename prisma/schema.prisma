@@ -66,8 +66,8 @@ model Room {
     createdAt   DateTime @default(now())
     status      String?
     createdById String
+    timer      DateTime?
     user        User @relation(fields: [createdById], references: [id])
-
     votes Votes[]
     @@index([createdById])
 }

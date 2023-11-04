@@ -6,5 +6,5 @@ export const pusher = new Pusher({
   key: process.env.NEXT_PUBLIC_PUSHER_KEY!,
   cluster: "",
   host: process.env.NEXT_PUBLIC_SOKETI_URL!,
-  port: process.env.NEXT_PUBLIC_SOKETI_PORT!,
+  useTLS: true,
 });

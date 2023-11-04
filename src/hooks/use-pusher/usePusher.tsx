@@ -7,11 +7,14 @@ import {
   type VoteApiResponse,
   type RevealVotesResponse,
   type ResetRoomResponse,
+  type SetTimerResponse,
+  type LocalStorageData,
 } from "./types";
 import { api } from "@/utils/api";
 import { ROOM_STATUS } from "@/enum/status";
 import { type UsersInRoom, type UserVoted } from "@/types/users-in-room";
 import { type MembersResponse } from "@/types/members";
+import { useTimer } from "../use-timer/useTimer";
 
 Pusher.logToConsole = true;
 interface UsePusherProps {
@@ -25,10 +28,10 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
   const [usersInRoom, setUsersInRoom] = useState<UsersInRoom[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [cardIsLoading, setCardIsLoading] = useState(false);
-  const { data: getRoom, refetch: getRoomRefetch } =
-    api.room.getByRoomId.useQuery({
-      id: roomId,
-    });
+  const { data: getRoom } = api.room.getByRoomId.useQuery({
+    id: roomId,
+  });
+  const { formatedTimer, setTimer, isTimerRunning } = useTimer();
 
   const { mutateAsync: onRevealRoom } = api.room.revealRoom.useMutation({});
 
@@ -37,8 +40,10 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
   const getMyVote = usersInRoom.find((user) => user?.id === data?.user.id);
 
   const pusher = pusherRef.current;
-  const allUsersVoted =
-    usersInRoom.every((user) => user?.voted) || step === "voted";
+  const canRevealVote =
+    usersInRoom.every((user) => user?.voted) ||
+    step === "voted" ||
+    !isTimerRunning;
 
   const handleResetVote = async () => {
     try {
@@ -112,7 +117,7 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       //@ts-ignore
       localStorage.getItem(`${roomId}-vote`),
-    ) as UsersInRoom[];
+    ) as LocalStorageData;
 
     if (mounted) {
       pusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
@@ -133,11 +138,11 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
             id: data.user.id,
             image: data.user.image,
             voted:
-              storageData?.find((user) => user.id === data.user.id)?.voted ??
-              false,
+              storageData?.users?.find((user) => user.id === data.user.id)
+                ?.voted ?? false,
             choose:
-              storageData?.find((user) => user.id === data.user.id)?.choose ??
-              null,
+              storageData?.users?.find((user) => user.id === data.user.id)
+                ?.choose ?? null,
           },
         },
       });
@@ -154,33 +159,61 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
         const users = userResponse.map((user) => {
           if (!storageData) return user;
 
-          const userVoted = storageData.find((v) => v.id === user.id);
+          const userVoted = storageData?.users?.find((v) => v.id === user.id);
           if (!userVoted) return user;
 
           return userVoted;
         });
 
-        localStorage.setItem(`${roomId}-vote`, JSON.stringify(users));
+        const localDate = new Date(storageData?.timer);
+        const currentDate = new Date();
+
+        const timer =
+          localDate > currentDate
+            ? Math.floor((localDate.getTime() - currentDate.getTime()) / 1000)
+            : 0;
+
+        setTimer(timer);
+
+        const data = {
+          users,
+          timer: storageData?.timer ?? 0,
+        };
+        localStorage.setItem(`${roomId}-vote`, JSON.stringify(data));
         setUsersInRoom(users);
       },
     );
 
-    channel.bind("vote", (userVote: VoteApiResponse) => {
-      setUsersInRoom(userVote.users);
+    channel.bind("vote", ({ users }: VoteApiResponse) => {
+      setUsersInRoom(users);
 
-      const json = JSON.stringify(userVote.users);
+      const data = {
+        users: users,
+        timer: 0,
+      };
+      const json = JSON.stringify(data);
       localStorage.setItem(`${roomId}-vote`, json);
     });
 
     channel.bind("reset-vote", ({ roomId, users }: ResetRoomResponse) => {
       setUsersInRoom(users);
       setStep(ROOM_STATUS.VOTING);
-      localStorage.setItem(`${roomId}-vote`, JSON.stringify(users));
+
+      const data = {
+        users,
+        timer: 0,
+      };
+      localStorage.setItem(`${roomId}-vote`, JSON.stringify(data));
     });
 
     channel.bind("reveal-vote", ({ users }: RevealVotesResponse) => {
       if (!users) return;
-      localStorage.setItem(`${roomId}-vote`, JSON.stringify(users));
+      const data = {
+        roomId,
+        users,
+        timer: 0,
+      };
+      localStorage.setItem(`${roomId}-vote`, JSON.stringify(data));
       setUsersInRoom(users);
       setStep(ROOM_STATUS.VOTED);
     });
@@ -194,8 +227,23 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
       },
     );
 
+    channel.bind("set-timer", ({ timer, users }: SetTimerResponse) => {
+      const timerToDate = new Date(new Date().getTime() + timer * 60 * 1000);
+
+      const data = {
+        roomId,
+        users,
+        timer: timerToDate,
+      };
+      setUsersInRoom(users);
+      setTimer(timer * 60);
+
+      setStep(ROOM_STATUS.VOTING);
+      localStorage.setItem(`${roomId}-vote`, JSON.stringify(data));
+    });
+
     channel.bind("pusher:member_added", function (member: AddedMemberResponse) {
-      const currentUser = storageData?.find(
+      const currentUser = storageData?.users?.find(
         (user) => user.id === member.info.id,
       );
 
@@ -212,7 +260,7 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
       mounted = false;
       channel.unsubscribe();
     };
-  }, [roomId, data]);
+  }, [roomId, data, setTimer]);
 
   const handleCreateVote = async (choose: string) => {
     if (cardIsLoading) return;
@@ -240,10 +288,32 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
     }
   };
 
+  const handleInitTimer = async (timer: number) => {
+    if (cardIsLoading) return;
+    try {
+      setCardIsLoading(true);
+      const payload = {
+        roomId: roomId,
+        timer: timer,
+        users: usersInRoom,
+      };
+
+      await fetch("/api/timer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setCardIsLoading(false);
+    }
+  };
+
   return {
     pusher,
     usersInRoom,
-    allUsersVoted,
+    canRevealVote,
     getMyVote,
     handleCreateVote,
     getRoom,
@@ -252,5 +322,8 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
     isLoading,
     cardIsLoading,
     handleRevealVote,
+    handleInitTimer,
+    formatedTimer,
+    isTimerRunning,
   };
 };

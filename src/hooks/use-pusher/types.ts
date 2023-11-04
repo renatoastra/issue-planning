@@ -37,3 +37,14 @@ export type ResetRoomResponse = {
   roomId: string;
   users: UsersInRoom[];
 };
+
+export type SetTimerResponse = {
+  roomId: string;
+  users: UsersInRoom[];
+  timer: number;
+};
+
+export type LocalStorageData = {
+  users: UsersInRoom[];
+  timer: Date;
+};

@@ -6,7 +6,6 @@ import {
   publicProcedure,
 } from "@/server/api/trpc";
 import { ROOM_STATUS } from "@/enum/status";
-import { UsersInRoom } from "@/types/users-in-room";
 
 export const roomRouter = createTRPCRouter({
   create: protectedProcedure
@@ -19,6 +18,7 @@ export const roomRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const { description, link, title } = input;
+
       try {
         const query = await ctx.db.room.create({
           data: {

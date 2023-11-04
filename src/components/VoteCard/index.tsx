@@ -20,7 +20,7 @@ export const VoteCard = ({
   return (
     <Card
       onClick={onClick}
-      className={` h-44 w-32 max-w-[128px] cursor-pointer bg-primary-foreground ${
+      className={` h-40 max-w-[128px] cursor-pointer bg-primary-foreground 2xl:h-44 2xl:w-32 ${
         currentChoice ? "bg-indigo-700 text-white" : ""
       }`}
     >
