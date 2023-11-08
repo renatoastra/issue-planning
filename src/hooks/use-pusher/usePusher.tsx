@@ -16,7 +16,7 @@ import { type UsersInRoom, type UserVoted } from "@/types/users-in-room";
 import { type MembersResponse } from "@/types/members";
 import { useTimer } from "../use-timer/useTimer";
 
-Pusher.logToConsole = true;
+Pusher.logToConsole = false;
 interface UsePusherProps {
   roomId: string;
 }
@@ -36,7 +36,6 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
   const { data: roomData } = api.room.getRoomData.useQuery({ roomId });
   const { mutateAsync: onInsertVote } = api.room.createVote.useMutation();
   const { mutateAsync: onRevealRoom } = api.room.revealRoom.useMutation({});
-  console.log("🚀 ~ roomData:", roomData);
 
   const { mutateAsync: onResetRoom } = api.room.resetRoom.useMutation({});
   const { mutateAsync: onSetTimer } = api.room.setTimer.useMutation({});

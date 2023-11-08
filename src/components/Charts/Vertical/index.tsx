@@ -49,7 +49,6 @@ export function ResultChart({ usersInRoom, roomId }: ResultChartProps) {
     window.localStorage.getItem(`${roomId}-vote`),
   );
   const getVotesByType = (type: string) => {
-    console.log("🚀 ~ localStorage:", localStorageUsers);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     return localStorageUsers?.users.filter(
       (user: UsersInRoom) => user.choose === type,
