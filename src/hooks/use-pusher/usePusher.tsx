@@ -33,10 +33,14 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
   });
   const { formatedTimer, setTimer, isTimerRunning } = useTimer();
 
+  const { data: roomData, refetch: refetchRoomData } =
+    api.room.getRoomData.useQuery({ roomId });
+  const { mutateAsync: onInsertVote } = api.room.createVote.useMutation();
   const { mutateAsync: onRevealRoom } = api.room.revealRoom.useMutation({});
+  console.log("🚀 ~ roomData:", roomData);
 
   const { mutateAsync: onResetRoom } = api.room.resetRoom.useMutation({});
-
+  const { mutateAsync: onSetTimer } = api.room.setTimer.useMutation({});
   const getMyVote = usersInRoom.find((user) => user?.id === data?.user.id);
 
   const pusher = pusherRef.current;
@@ -113,11 +117,16 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
     if (!data?.user.id) return;
     let mounted = true;
 
-    const storageData = JSON.parse(
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //@ts-ignore
-      localStorage.getItem(`${roomId}-vote`),
-    ) as LocalStorageData;
+    // const storageData = JSON.parse(
+    //   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //   //@ts-ignore
+    //   localStorage.getItem(`${roomId}-vote`),
+    // ) as LocalStorageData;
+
+    const storageData = {
+      users: roomData?.users,
+      timer: roomData?.timer,
+    };
 
     if (mounted) {
       pusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
@@ -165,7 +174,7 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
           return userVoted;
         });
 
-        const localDate = new Date(storageData?.timer);
+        const localDate = new Date(storageData?.timer ?? 0);
         const currentDate = new Date();
 
         const timer =
@@ -195,10 +204,9 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
       localStorage.setItem(`${roomId}-vote`, json);
     });
 
-    channel.bind("reset-vote", ({ roomId, users }: ResetRoomResponse) => {
-      setUsersInRoom(users);
+    channel.bind("reset-vote", async ({ roomId, users }: ResetRoomResponse) => {
       setStep(ROOM_STATUS.VOTING);
-
+      setUsersInRoom(users);
       const data = {
         users,
         timer: 0,
@@ -250,7 +258,19 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
       if (currentUser) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         //@ts-ignore
-        member.info && setUsersInRoom((prev) => [...prev, currentUser]);
+        member.info &&
+          setUsersInRoom((prev) => {
+            return prev.map((user) => {
+              if (user?.id === member.info.id) {
+                return {
+                  ...user,
+                  voted: currentUser.voted,
+                  choose: currentUser.choose,
+                };
+              }
+              return user;
+            });
+          });
       } else {
         member.info && setUsersInRoom((prev) => [...prev, member.info]);
       }
@@ -260,12 +280,18 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
       mounted = false;
       channel.unsubscribe();
     };
-  }, [roomId, data, setTimer]);
+  }, [roomId, data, setTimer, roomData?.timer, roomData?.users]);
 
   const handleCreateVote = async (choose: string) => {
     if (cardIsLoading) return;
     try {
+      if (!data?.user.id) return;
       setCardIsLoading(true);
+      await onInsertVote({
+        roomId,
+        value: choose,
+        userId: data?.user.id,
+      });
       const payload = {
         id: data?.user.id,
         username: data?.user.name,
@@ -290,8 +316,13 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
 
   const handleInitTimer = async (timer: number) => {
     if (cardIsLoading) return;
+
     try {
       setCardIsLoading(true);
+      await onSetTimer({
+        roomId,
+        timer,
+      });
       const payload = {
         roomId: roomId,
         timer: timer,
