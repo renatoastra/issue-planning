@@ -204,7 +204,7 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
       localStorage.setItem(`${roomId}-vote`, json);
     });
 
-    channel.bind("reset-vote", async ({ roomId, users }: ResetRoomResponse) => {
+    channel.bind("reset-vote", ({ roomId, users }: ResetRoomResponse) => {
       setStep(ROOM_STATUS.VOTING);
       setUsersInRoom(users);
       const data = {
