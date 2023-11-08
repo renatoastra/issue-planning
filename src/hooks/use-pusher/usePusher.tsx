@@ -33,8 +33,7 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
   });
   const { formatedTimer, setTimer, isTimerRunning } = useTimer();
 
-  const { data: roomData, refetch: refetchRoomData } =
-    api.room.getRoomData.useQuery({ roomId });
+  const { data: roomData } = api.room.getRoomData.useQuery({ roomId });
   const { mutateAsync: onInsertVote } = api.room.createVote.useMutation();
   const { mutateAsync: onRevealRoom } = api.room.revealRoom.useMutation({});
   console.log("🚀 ~ roomData:", roomData);
