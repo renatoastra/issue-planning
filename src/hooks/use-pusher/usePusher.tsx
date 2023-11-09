@@ -181,35 +181,17 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
             : 0;
 
         setTimer(timer);
-
-        const data = {
-          users,
-          timer: storageData?.timer ?? 0,
-        };
-        localStorage.setItem(`${roomId}-vote`, JSON.stringify(data));
         setUsersInRoom(users);
       },
     );
 
     channel.bind("vote", ({ users }: VoteApiResponse) => {
       setUsersInRoom(users);
-
-      const data = {
-        users: users,
-        timer: 0,
-      };
-      const json = JSON.stringify(data);
-      localStorage.setItem(`${roomId}-vote`, json);
     });
 
     channel.bind("reset-vote", ({ roomId, users }: ResetRoomResponse) => {
       setStep(ROOM_STATUS.VOTING);
       setUsersInRoom(users);
-      const data = {
-        users,
-        timer: 0,
-      };
-      localStorage.setItem(`${roomId}-vote`, JSON.stringify(data));
     });
 
     channel.bind("reveal-vote", ({ users }: RevealVotesResponse) => {
@@ -235,17 +217,10 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
 
     channel.bind("set-timer", ({ timer, users }: SetTimerResponse) => {
       const timerToDate = new Date(new Date().getTime() + timer * 60 * 1000);
-
-      const data = {
-        roomId,
-        users,
-        timer: timerToDate,
-      };
       setUsersInRoom(users);
       setTimer(timer * 60);
 
       setStep(ROOM_STATUS.VOTING);
-      localStorage.setItem(`${roomId}-vote`, JSON.stringify(data));
     });
 
     channel.bind("pusher:member_added", function (member: AddedMemberResponse) {
