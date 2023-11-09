@@ -129,6 +129,8 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
     if (mounted) {
       pusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
         cluster: process.env.NEXT_PUBLIC_SOKETI_CLUSTER!,
+        wsHost: process.env.NEXT_PUBLIC_SOKETI_URL!,
+        wsPort: parseInt(process.env.NEXT_PUBLIC_SOKETI_PORT!),
         forceTLS: false,
         disableStats: true,
         enabledTransports: ["ws", "wss"],
@@ -183,13 +185,37 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
       },
     );
 
-    channel.bind("vote", ({ users }: VoteApiResponse) => {
-      setUsersInRoom(users);
+    channel.bind("vote", ({ id, choose }: VoteApiResponse) => {
+      setUsersInRoom((prev) => {
+        return prev.map((user) => {
+          if (user?.id === id) {
+            return {
+              ...user,
+              voted: true,
+              choose,
+            };
+          }
+          return user;
+        });
+      });
     });
 
     channel.bind("reset-vote", ({ roomId, users }: ResetRoomResponse) => {
       setStep(ROOM_STATUS.VOTING);
-      setUsersInRoom(users);
+      setUsersInRoom((prev) =>
+        prev.map((user) => {
+          return {
+            ...user,
+            voted: false,
+            choose: null,
+          };
+        }),
+      );
+      const data = {
+        users,
+        timer: 0,
+      };
+      localStorage.setItem(`${roomId}-vote`, JSON.stringify(data));
     });
 
     channel.bind("reveal-vote", ({ users }: RevealVotesResponse) => {
@@ -215,6 +241,12 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
 
     channel.bind("set-timer", ({ timer, users }: SetTimerResponse) => {
       const timerToDate = new Date(new Date().getTime() + timer * 60 * 1000);
+
+      const data = {
+        roomId,
+        users,
+        timer: timerToDate,
+      };
       setUsersInRoom(users);
       setTimer(timer * 60);
 
