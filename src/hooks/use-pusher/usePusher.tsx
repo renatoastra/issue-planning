@@ -16,7 +16,7 @@ import { type UsersInRoom, type UserVoted } from "@/types/users-in-room";
 import { type MembersResponse } from "@/types/members";
 import { useTimer } from "../use-timer/useTimer";
 
-Pusher.logToConsole = false;
+Pusher.logToConsole = true;
 interface UsePusherProps {
   roomId: string;
 }
@@ -33,7 +33,7 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
   });
   const { formatedTimer, setTimer, isTimerRunning } = useTimer();
 
-  const { data: roomData } = api.room.getRoomData.useQuery({ roomId });
+  const { data: roomData, refetch } = api.room.getRoomData.useQuery({ roomId });
   const { mutateAsync: onInsertVote } = api.room.createVote.useMutation();
   const { mutateAsync: onRevealRoom } = api.room.revealRoom.useMutation({});
 
@@ -198,7 +198,7 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
       });
     });
 
-    channel.bind("reset-vote", ({ roomId, users }: ResetRoomResponse) => {
+    channel.bind("reset-vote", async ({ roomId, users }: ResetRoomResponse) => {
       setStep(ROOM_STATUS.VOTING);
       setUsersInRoom((prev) =>
         prev.map((user) => {
@@ -213,6 +213,7 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
         users,
         timer: 0,
       };
+      await refetch();
       localStorage.setItem(`${roomId}-vote`, JSON.stringify(data));
     });
 
@@ -230,10 +231,15 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
     channel.bind(
       "pusher:member_removed",
       function (member: RemovedMemberResponse) {
-        member.info &&
+        const hasVoted = storageData?.users?.find(
+          (user) => user.id === member.info.id,
+        )?.voted;
+
+        if (!hasVoted) {
           setUsersInRoom((prev) => {
             return prev.filter((user) => user?.id !== member.info.id);
           });
+        }
       },
     );
 
@@ -265,8 +271,6 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
               if (user?.id === member.info.id) {
                 return {
                   ...user,
-                  voted: currentUser.voted,
-                  choose: currentUser.choose,
                 };
               }
               return user;
@@ -281,7 +285,15 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
       mounted = false;
       channel.unsubscribe();
     };
-  }, [roomId, data, setTimer, roomData?.timer, roomData?.users]);
+  }, [
+    data?.user.id,
+    data?.user.image,
+    data?.user.name,
+    roomData?.timer,
+    roomData?.users,
+    roomId,
+    setTimer,
+  ]);
 
   const handleCreateVote = async (choose: string) => {
     if (cardIsLoading) return;
