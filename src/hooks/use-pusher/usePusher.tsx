@@ -125,13 +125,10 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
       users: roomData?.users,
       timer: roomData?.timer,
     };
-    console.log("🚀 ~ storageData:", storageData);
 
     if (mounted) {
       pusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
         cluster: process.env.NEXT_PUBLIC_SOKETI_CLUSTER!,
-        wsHost: process.env.NEXT_PUBLIC_SOKETI_URL!,
-        wsPort: parseInt(process.env.NEXT_PUBLIC_SOKETI_PORT!),
         forceTLS: false,
         disableStats: true,
         enabledTransports: ["ws", "wss"],
@@ -187,7 +184,6 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
     );
 
     channel.bind("vote", ({ id, choose }: VoteApiResponse) => {
-      console.log("ENTROU AQUIIIIIIIIIIII");
       setUsersInRoom((prev) => {
         return prev.map((user) => {
           if (user?.id === id) {
