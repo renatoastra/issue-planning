@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { UserX } from "lucide-react";
 import { api } from "@/utils/api";
+import { useSession } from "next-auth/react";
 
 export const RemoveUserDropDown = ({
   children,
@@ -24,7 +25,9 @@ export const RemoveUserDropDown = ({
   userId: string;
 }) => {
   const { mutateAsync: onRemoveMember } = api.room.removeMember.useMutation();
-  if (!isRoomOwner) {
+  const { data } = useSession();
+  const currentUser = userId === data?.user.id;
+  if (!isRoomOwner || currentUser) {
     return <>{children}</>;
   }
 
