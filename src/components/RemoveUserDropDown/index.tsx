@@ -7,7 +7,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { UserX } from "lucide-react";
@@ -31,17 +30,6 @@ export const RemoveUserDropDown = ({
 
   const handleRemoveUser = async () => {
     try {
-      // const response = await fetch("/api/remove-member", {
-      //   method: "POST",
-      //   body: JSON.stringify({
-      //     roomId: roomId,
-      //     memberIdToRemove: userId,
-      //   }),
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      // });
-
       await onRemoveMember({
         memberIdToRemove: userId,
         roomId: roomId,

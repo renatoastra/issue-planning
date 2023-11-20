@@ -17,7 +17,7 @@ import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard/useCopyToClipb
 import { LoadingSpinner } from "@/components/Loading";
 import { useState } from "react";
 import { sliceUsername } from "@/utils/slice-username";
-import { RemoveUserDropDown } from "./_components/RemoveUserDropDown";
+import { RemoveUserDropDown } from "@/components/RemoveUserDropDown";
 
 type PageProps = {
   roomId: string;
