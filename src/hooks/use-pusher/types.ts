@@ -48,3 +48,9 @@ export type LocalStorageData = {
   users: UsersInRoom[];
   timer: Date;
 };
+
+export type RemoveMemberResponse = {
+  roomId: string;
+  users: UsersInRoom[];
+  memberIdToRemove: string;
+};

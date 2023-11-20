@@ -2,19 +2,19 @@ import { useSession } from "next-auth/react";
 import Pusher from "pusher-js";
 import { useEffect, useRef, useState } from "react";
 import {
-  type RemovedMemberResponse,
   type AddedMemberResponse,
   type VoteApiResponse,
   type RevealVotesResponse,
   type ResetRoomResponse,
   type SetTimerResponse,
-  type LocalStorageData,
+  type RemoveMemberResponse,
 } from "./types";
 import { api } from "@/utils/api";
 import { ROOM_STATUS } from "@/enum/status";
-import { type UsersInRoom, type UserVoted } from "@/types/users-in-room";
+import { type UsersInRoom } from "@/types/users-in-room";
 import { type MembersResponse } from "@/types/members";
 import { useTimer } from "../use-timer/useTimer";
+import { useRouter } from "next/router";
 
 Pusher.logToConsole = true;
 interface UsePusherProps {
@@ -24,6 +24,7 @@ interface UsePusherProps {
 export const usePusher = ({ roomId }: UsePusherProps) => {
   const pusherRef = useRef<Pusher>();
   const { data } = useSession();
+  const router = useRouter();
   const [step, setStep] = useState("");
   const [usersInRoom, setUsersInRoom] = useState<UsersInRoom[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -33,10 +34,10 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
   });
   const { formatedTimer, setTimer, isTimerRunning } = useTimer();
 
-  const { data: roomData, refetch } = api.room.getRoomData.useQuery({ roomId });
+  const { data: roomData, refetch: getRoomDataRefetch } =
+    api.room.getRoomData.useQuery({ roomId });
   const { mutateAsync: onInsertVote } = api.room.createVote.useMutation();
   const { mutateAsync: onRevealRoom } = api.room.revealRoom.useMutation({});
-
   const { mutateAsync: onResetRoom } = api.room.resetRoom.useMutation({});
   const { mutateAsync: onSetTimer } = api.room.setTimer.useMutation({});
   const getMyVote = usersInRoom.find((user) => user?.id === data?.user.id);
@@ -108,69 +109,87 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
       console.log(error);
     } finally {
       setIsLoading(false);
+      setStep(ROOM_STATUS.VOTED);
     }
   };
 
   useEffect(() => {
     if (!data?.user.id) return;
     let mounted = true;
-
-    // const storageData = JSON.parse(
-    //   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //   //@ts-ignore
-    //   localStorage.getItem(`${roomId}-vote`),
-    // ) as LocalStorageData;
-
-    const storageData = {
-      users: roomData?.users,
-      timer: roomData?.timer,
+    const timer = roomData?.timer ?? 0;
+    const users = roomData?.users ?? [];
+    const dbData = {
+      timer,
+      users,
     };
 
     if (mounted) {
       pusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
         cluster: process.env.NEXT_PUBLIC_SOKETI_CLUSTER!,
+        wsHost: process.env.NEXT_PUBLIC_SOKETI_URL!,
+        wsPort: parseInt(process.env.NEXT_PUBLIC_SOKETI_PORT!),
         forceTLS: false,
-        disableStats: true,
         enabledTransports: ["ws", "wss"],
         authEndpoint: "/api/pusher",
         userAuthentication: {
-          endpoint: "/api/pusher",
+          endpoint: "/api/user-auth",
           transport: "ajax",
+          params: {
+            userId: data.user.id,
+            username: data.user.name,
+            image: data.user.image,
+          },
         },
         auth: {
           params: {
+            roomId,
             username: data.user.name,
             id: data.user.id,
             image: data.user.image,
             voted:
-              storageData?.users?.find((user) => user.id === data.user.id)
-                ?.voted ?? false,
+              dbData?.users?.find((user) => user.id === data.user.id)?.voted ??
+              false,
             choose:
-              storageData?.users?.find((user) => user.id === data.user.id)
-                ?.choose ?? null,
+              dbData?.users?.find((user) => user.id === data.user.id)?.choose ??
+              null,
           },
         },
       });
     }
     if (!pusherRef.current) return;
+
     const channel = pusherRef.current.subscribe(`presence-room-${roomId}`);
+    const userChannel = pusherRef.current.subscribe(
+      `presence-user-${data.user.id}`,
+    );
+
+    userChannel.bind("user-removed", async () => {
+      await router.push("https://www.google.com");
+    });
+
     channel.bind(
       "pusher:subscription_succeeded",
       (members: MembersResponse) => {
+        console.log("🚀 ~ members:", members);
         const userResponse = Object.values(
           members.members,
         ) as unknown as UsersInRoom[];
 
-        const users = userResponse.map((user) => {
-          if (!storageData) return user;
+        const users = userResponse
+          .map((user) => {
+            if (!dbData) return user;
 
-          const userVoted = storageData?.users?.find((v) => v.id === user.id);
-          if (!userVoted) return user;
+            const userVoted = dbData?.users?.find((v) => v.id === user.id);
+            if (!userVoted) return user;
 
-          return userVoted;
-        });
+            return userVoted;
+          })
+          .sort((a, b) => {
+            if (!a.username || !b.username) return 0;
+            return a.username.localeCompare(b.username);
+          });
 
-        const localDate = new Date(storageData?.timer ?? 0);
+        const localDate = new Date(dbData?.timer ?? 0);
         const currentDate = new Date();
 
         const timer =
@@ -178,8 +197,8 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
             ? Math.floor((localDate.getTime() - currentDate.getTime()) / 1000)
             : 0;
 
-        setTimer(timer);
         setUsersInRoom(users);
+        setTimer(timer);
       },
     );
 
@@ -198,7 +217,7 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
       });
     });
 
-    channel.bind("reset-vote", async ({ roomId, users }: ResetRoomResponse) => {
+    channel.bind("reset-vote", ({ roomId, users }: ResetRoomResponse) => {
       setStep(ROOM_STATUS.VOTING);
       setUsersInRoom((prev) =>
         prev.map((user) => {
@@ -209,12 +228,6 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
           };
         }),
       );
-      const data = {
-        users,
-        timer: 0,
-      };
-      await refetch();
-      localStorage.setItem(`${roomId}-vote`, JSON.stringify(data));
     });
 
     channel.bind("reveal-vote", ({ users }: RevealVotesResponse) => {
@@ -228,70 +241,44 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
       setUsersInRoom(users);
       setStep(ROOM_STATUS.VOTED);
     });
-    channel.bind(
-      "pusher:member_removed",
-      function (member: RemovedMemberResponse) {
-        const hasVoted = storageData?.users?.find(
-          (user) => user.id === member.info.id,
-        )?.voted;
-
-        if (!hasVoted) {
-          setUsersInRoom((prev) => {
-            return prev.filter((user) => user?.id !== member.info.id);
-          });
-        }
-      },
-    );
-
     channel.bind("set-timer", ({ timer, users }: SetTimerResponse) => {
-      const timerToDate = new Date(new Date().getTime() + timer * 60 * 1000);
-
-      const data = {
-        roomId,
-        users,
-        timer: timerToDate,
-      };
       setUsersInRoom(users);
       setTimer(timer * 60);
 
       setStep(ROOM_STATUS.VOTING);
     });
 
-    channel.bind("pusher:member_added", function (member: AddedMemberResponse) {
-      const currentUser = storageData?.users?.find(
-        (user) => user.id === member.info.id,
-      );
+    channel.bind(
+      "remove-member",
+      ({ memberIdToRemove }: RemoveMemberResponse) => {
+        setUsersInRoom((prev) =>
+          prev.filter((user) => user?.id !== memberIdToRemove),
+        );
+      },
+    );
 
-      if (currentUser) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        //@ts-ignore
-        member.info &&
-          setUsersInRoom((prev) => {
-            return prev.map((user) => {
-              if (user?.id === member.info.id) {
-                return {
-                  ...user,
-                };
-              }
-              return user;
-            });
-          });
-      } else {
-        member.info && setUsersInRoom((prev) => [...prev, member.info]);
-      }
+    channel.bind("pusher:member_added", function (member: AddedMemberResponse) {
+      member.info &&
+        setUsersInRoom((prev) => {
+          const filteredMembers = prev.filter((m) => m.id !== member.info.id);
+          const members = [...filteredMembers, member.info];
+          return members;
+        });
     });
+
     return () => {
       pusherRef.current?.disconnect();
       mounted = false;
       channel.unsubscribe();
+      userChannel.unsubscribe();
     };
   }, [
     data?.user.id,
     data?.user.image,
     data?.user.name,
-    roomData?.timer,
-    roomData?.users,
+    roomData,
     roomId,
+    router,
     setTimer,
   ]);
 
@@ -369,5 +356,6 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
     handleInitTimer,
     formatedTimer,
     isTimerRunning,
+    getRoomDataRefetch,
   };
 };

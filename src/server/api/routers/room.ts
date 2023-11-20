@@ -6,6 +6,7 @@ import {
   publicProcedure,
 } from "@/server/api/trpc";
 import { ROOM_STATUS } from "@/enum/status";
+import { pusher } from "@/libs/pusher/server";
 
 export const roomRouter = createTRPCRouter({
   create: protectedProcedure
@@ -194,12 +195,19 @@ export const roomRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       const { roomId } = input;
-      const query = await ctx.db.votes.findMany({
+      const query = await ctx.db.room.findUnique({
         where: {
-          roomId: roomId,
+          id: roomId,
         },
         include: {
-          user: true,
+          votes: {
+            orderBy: {
+              user: {
+                name: "desc",
+              },
+            },
+          },
+          users: true,
         },
       });
 
@@ -211,14 +219,15 @@ export const roomRouter = createTRPCRouter({
           timer: true,
         },
       });
-
-      const users = query.map((vote) => {
+      const roomOwner = query?.createdById;
+      const users = query?.users.map((user) => {
+        const vote = query.votes.find((vote) => vote.userId === user.id);
         return {
-          id: vote.user.id,
-          username: vote.user.name,
-          choose: vote.value,
-          user_image_url: vote.user.image,
-          voted: true,
+          id: user.id,
+          username: user.name,
+          choose: vote?.value ?? null,
+          user_image_url: user.image,
+          voted: vote?.value ? true : false,
         };
       });
 
@@ -253,5 +262,72 @@ export const roomRouter = createTRPCRouter({
       });
 
       return query;
+    }),
+
+  insertMemberInRoom: protectedProcedure
+    .input(
+      z.object({
+        roomId: z.string(),
+        userId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { roomId, userId } = input;
+
+      return await ctx.db.room.update({
+        where: {
+          id: roomId,
+        },
+        data: {
+          user: { connect: { id: userId } },
+        },
+      });
+    }),
+
+  removeMember: protectedProcedure
+    .input(
+      z.object({
+        roomId: z.string(),
+        memberIdToRemove: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { roomId, memberIdToRemove } = input;
+      try {
+        await ctx.db.room.update({
+          where: {
+            id: roomId,
+          },
+          data: {
+            users: {
+              disconnect: {
+                id: memberIdToRemove,
+              },
+            },
+            votes: {
+              deleteMany: {
+                userId: memberIdToRemove,
+              },
+            },
+          },
+        });
+
+        await pusher.trigger(`presence-room-${roomId}`, "remove-member", {
+          memberIdToRemove,
+        });
+
+        await pusher.trigger(
+          `presence-user-${memberIdToRemove}`,
+          "user-removed",
+          {
+            message: "You have been removed from the room",
+          },
+        );
+
+        return { message: "success" };
+      } catch (err) {
+        console.log(err);
+        return { message: err };
+      }
     }),
 });

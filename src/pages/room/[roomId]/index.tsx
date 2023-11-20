@@ -17,6 +17,7 @@ import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard/useCopyToClipb
 import { LoadingSpinner } from "@/components/Loading";
 import { useState } from "react";
 import { sliceUsername } from "@/utils/slice-username";
+import { RemoveUserDropDown } from "./_components/RemoveUserDropDown";
 
 type PageProps = {
   roomId: string;
@@ -90,29 +91,33 @@ const Page = ({ roomId, userId, description, link, title }: PageProps) => {
         <div className="absolute right-0 h-full overflow-y-auto border-l  border-l-secondary bg-primary-foreground xl:w-60   ">
           <h1 className=" p-6 text-3xl font-bold">Usuários</h1>
           <div>
-            {usersInRoom?.map((user, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between  gap-2 p-3  text-sm hover:bg-secondary hover:bg-opacity-95"
+            {usersInRoom?.map((user) => (
+              <RemoveUserDropDown
+                roomId={roomId}
+                userId={user.id}
+                isRoomOwner={roomOwner}
+                key={user.id}
               >
-                <UserAvatar
-                  src={user?.user_image_url ?? ""}
-                  fallback={user?.username ?? ""}
-                />
-                <div className=" flex items-center justify-center gap-2  ">
-                  <p className="hidden lg:block">
-                    {user?.username && user?.username?.length > 12
-                      ? sliceUsername(user?.username, 12)
-                      : user?.username}
-                  </p>
-                  {userId === user?.id && (
-                    <div title="Room leader" className="text-start">
-                      <span className="text-xl">👑</span>
-                    </div>
-                  )}
+                <div className="flex items-center justify-between  gap-2 p-3  text-sm hover:bg-secondary hover:bg-opacity-95">
+                  <UserAvatar
+                    src={user?.user_image_url ?? ""}
+                    fallback={user?.username ?? ""}
+                  />
+                  <div className=" flex items-center justify-center gap-2  ">
+                    <p className="hidden lg:block">
+                      {user?.username && user?.username?.length > 12
+                        ? sliceUsername(user?.username, 12)
+                        : user?.username}
+                    </p>
+                    {userId === user?.id && (
+                      <div title="Room leader" className="text-start">
+                        <span className="text-xl">👑</span>
+                      </div>
+                    )}
+                  </div>
+                  <Checkbox disabled checked={user?.voted} />
                 </div>
-                <Checkbox disabled checked={user?.voted} />
-              </div>
+              </RemoveUserDropDown>
             ))}
           </div>
         </div>
