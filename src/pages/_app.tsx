@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/providers/theme-provider";
 
 import { Navbar } from "@/components/Navbar";
 import "@/styles/globals.css";
+import { Toaster } from "@/components/ui/toaster";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -22,6 +23,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
       <ThemeProvider attribute="class" defaultTheme="light">
         <VoteResultContextProvider>
           <ToastContainer />
+          <Toaster />
           <Navbar />
           <div className="xl:h-[calc(100vh-89px)]">
             <Component {...pageProps} />

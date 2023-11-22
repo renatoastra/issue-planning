@@ -10,7 +10,6 @@ import {
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
 import { type UsersInRoom } from "@/types/users-in-room";
-import { type LocalStorageData } from "@/hooks/use-pusher/types";
 
 ChartJS.register(
   CategoryScale,
@@ -43,9 +42,10 @@ interface ResultChartProps {
 
 export function ResultChart({ result, roomId }: ResultChartProps) {
   const getVotesByType = (type: string) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     return result?.filter((user: UsersInRoom) => user.choose === type);
   };
+
+  console.log();
 
   const data = () => {
     return {
@@ -53,7 +53,7 @@ export function ResultChart({ result, roomId }: ResultChartProps) {
       datasets: [
         {
           label: "Votos",
-          data: labels.map((p) => getVotesByType(p)?.length ?? []),
+          data: labels.map((p) => getVotesByType(p)?.length ?? 0),
           backgroundColor: "rgb(79, 70, 229)",
           borderColor: "rgb(79, 70, 229)",
         },

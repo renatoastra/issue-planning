@@ -18,6 +18,11 @@ import { LoadingSpinner } from "@/components/Loading";
 import { useState } from "react";
 import { sliceUsername } from "@/utils/slice-username";
 import { RemoveUserDropDown } from "@/components/RemoveUserDropDown";
+import { ToolTip } from "@/components/Tooltip";
+import { useToast } from "@/components/ui/use-toast";
+import { api } from "@/utils/api";
+import { type UsersInRoom } from "@/types/users-in-room";
+import { SideBarVoteResult } from "@/components/SideBarResult";
 
 type PageProps = {
   roomId: string;
@@ -39,7 +44,6 @@ export const getServerSideProps = async (
     },
     select: {
       createdById: true,
-      description: true,
       status: true,
       title: true,
       link: true,
@@ -55,7 +59,6 @@ export const getServerSideProps = async (
     props: {
       roomId,
       userId: query.createdById,
-      description: query.description,
       status: query.status,
       title: query.title,
       link: query.link,
@@ -63,7 +66,7 @@ export const getServerSideProps = async (
   };
 };
 
-const Page = ({ roomId, userId, description, link, title }: PageProps) => {
+const Page = ({ roomId, userId, link, title }: PageProps) => {
   const { data } = useSession();
 
   const {
@@ -83,51 +86,84 @@ const Page = ({ roomId, userId, description, link, title }: PageProps) => {
   const [value, copy] = useCopyToClipboard();
 
   const [handleTimer, setHandleTimer] = useState(0);
-
+  const { toast } = useToast();
   const roomOwner = userId === data?.user.id;
+
+  const handleCopyLink = async () => {
+    await copy(link);
+    toast({
+      title: "Link copiado",
+      description: "O link foi copiado para sua área de transferência",
+    });
+  };
+
+  const allUsersVoted = usersInRoom?.filter((user) => user.voted === true);
+
+  const labels = ["PP", "P", "M", "G", "GG"];
 
   return (
     <>
       <div className="relative flex h-full w-full  items-center  ">
         <div className="absolute right-0 h-full overflow-y-auto border-l  border-l-secondary bg-primary-foreground xl:w-60   ">
-          <h1 className=" p-6 text-3xl font-bold">Usuários</h1>
-          <div>
-            {usersInRoom?.map((user) => (
-              <RemoveUserDropDown
-                roomId={roomId}
-                userId={user.id}
-                isRoomOwner={roomOwner}
-                key={user.id}
-              >
-                <div className="flex items-center justify-between  gap-2 p-3  text-sm hover:bg-secondary hover:bg-opacity-95">
-                  <UserAvatar
-                    src={user?.user_image_url ?? ""}
-                    fallback={user?.username ?? ""}
-                  />
-                  <div className=" flex items-center justify-center gap-2  ">
-                    <p className="hidden lg:block">
-                      {user?.username && user?.username?.length > 12
-                        ? sliceUsername(user?.username, 12)
-                        : user?.username}
-                    </p>
-                    {userId === user?.id && (
-                      <div title="Room leader" className="text-start">
-                        <span className="text-xl">👑</span>
+          {step === ROOM_STATUS.VOTING && (
+            <>
+              <h1 className=" p-6 text-3xl font-bold">Usuários</h1>
+              <div>
+                {step === ROOM_STATUS.VOTING &&
+                  usersInRoom?.map((user) => (
+                    <RemoveUserDropDown
+                      roomId={roomId}
+                      userId={user.id}
+                      isRoomOwner={roomOwner}
+                      key={user.id}
+                    >
+                      <div className="flex items-center justify-between  gap-2 p-3  text-sm hover:bg-secondary hover:bg-opacity-95">
+                        <UserAvatar
+                          src={user?.user_image_url ?? ""}
+                          fallback={user?.username ?? ""}
+                        />
+                        <div className=" flex items-center justify-center gap-2  ">
+                          <p className="hidden lg:block">
+                            {user?.username && user?.username?.length > 12
+                              ? sliceUsername(user?.username, 12)
+                              : user?.username}
+                          </p>
+                          {userId === user?.id && (
+                            <div title="Room leader" className="text-start">
+                              <span className="text-xl">👑</span>
+                            </div>
+                          )}
+                        </div>
+                        <Checkbox disabled checked={user?.voted} />
                       </div>
-                    )}
-                  </div>
-                  <Checkbox disabled checked={user?.voted} />
-                </div>
-              </RemoveUserDropDown>
-            ))}
-          </div>
+                    </RemoveUserDropDown>
+                  ))}
+              </div>
+            </>
+          )}
+
+          {step === ROOM_STATUS.VOTED && (
+            <>
+              <h1 className=" p-6 text-3xl font-bold">Resultado</h1>
+              <div className="flex flex-col gap-6 p-3   text-sm">
+                {labels.map((label) => (
+                  <SideBarVoteResult
+                    key={label}
+                    users={allUsersVoted}
+                    roomOwnerId={userId}
+                    voteValue={label}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </div>
         <div className="flex h-full  w-[calc(100%-12.23rem)] flex-col   items-center justify-between  gap-6  xl:w-[calc(100%-18rem)]">
           <div className="flex h-full flex-col items-center justify-between py-8 xl:w-[58rem]">
             <div className="flex w-full flex-col gap-2 2xl:gap-8">
               <div className="flex w-full flex-col  gap-2">
                 <h3 className="flex items-center gap-2 text-xl font-bold">
-                  Titulo
+                  Issue:
                 </h3>
                 <Input
                   disabled
@@ -135,32 +171,39 @@ const Page = ({ roomId, userId, description, link, title }: PageProps) => {
                   value={title}
                 />
               </div>
+              <div
+                onClick={handleCopyLink}
+                className="flex w-full flex-col  gap-2"
+              >
+                <div className="items-center gap-3">
+                  <ToolTip text="Clique para copiar">
+                    <h3 className="flex cursor-pointer items-center gap-2 text-xl font-bold">
+                      Link
+                      <Link />
+                    </h3>
+                  </ToolTip>
+                </div>
 
-              <div className="flex w-full flex-col  gap-2">
-                <h3
-                  onClick={() => copy(link)}
-                  className="flex cursor-pointer items-center gap-2 text-xl font-bold"
-                  title="Copiar link"
-                >
-                  Link
-                  <Link />
-                </h3>
                 <Input
                   disabled
                   className="w-full bg-primary-foreground"
                   value={link}
                 />
               </div>
-
-              <Textarea
-                className="h-38 w-full resize-none bg-primary-foreground"
-                disabled
-                value={description}
-              />
-              <div className="w-full items-center  text-center text-xl 2xl:text-4xl">
-                {formatedTimer}
+              <div className="flex flex-col gap-3">
+                <h3 className="text-xl font-bold">
+                  Pontos para avaliar no seu critério:
+                </h3>
+                <Textarea
+                  className="h-38 w-full resize-none bg-primary-foreground"
+                  disabled
+                  value={`- Avaliar o trabalho com todas as stacks envolvidas. 
+- Avaliar o tempo gasto com possíveis ajustes que ocorram durante a issue.`}
+                />
+                <div className="w-full items-center  text-center text-xl 2xl:text-4xl">
+                  {formatedTimer}
+                </div>
               </div>
-
               {roomOwner && (
                 <div className="flex flex-col gap-2">
                   {step === ROOM_STATUS.VOTING && (
