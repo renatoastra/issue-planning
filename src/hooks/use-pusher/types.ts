@@ -1,4 +1,4 @@
-import { type UsersInRoom, type UsersInRoom } from "@/types/users-in-room";
+import { type UsersInRoom } from "@/types/users-in-room";
 
 type RemovedMemberInfo = {
   id: string;
