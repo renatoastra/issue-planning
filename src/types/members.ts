@@ -1,4 +1,5 @@
 type Member = {
+  id: string;
   username: string;
   user_image_url: string;
   choose: string;
@@ -23,5 +24,5 @@ export type MembersResponse = {
   members: Members;
   count: number;
   myID: string;
-  Me: Me;
+  me: Me;
 };

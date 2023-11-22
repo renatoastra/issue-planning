@@ -36,7 +36,8 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
 
   const { data: roomData, refetch: getRoomDataRefetch } =
     api.room.getRoomData.useQuery({ roomId });
-  const { mutateAsync: onInsertVote } = api.room.createVote.useMutation();
+  const { mutateAsync: onInsertVote, isLoading: isMutatingVote } =
+    api.room.createVote.useMutation();
   const { mutateAsync: onRevealRoom } = api.room.revealRoom.useMutation({});
   const { mutateAsync: onResetRoom } = api.room.resetRoom.useMutation({});
   const { mutateAsync: onSetTimer } = api.room.setTimer.useMutation({});
@@ -126,6 +127,9 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
     if (mounted) {
       pusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
         cluster: process.env.NEXT_PUBLIC_SOKETI_CLUSTER!,
+        wsHost: process.env.NEXT_PUBLIC_SOKETI_URL!,
+        wsPort: parseInt(process.env.NEXT_PUBLIC_SOKETI_PORT!),
+        forceTLS: false,
         enabledTransports: ["ws", "wss"],
         authEndpoint: "/api/pusher",
         userAuthentication: {
@@ -354,5 +358,6 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
     formatedTimer,
     isTimerRunning,
     getRoomDataRefetch,
+    isMutatingVote,
   };
 };

@@ -37,22 +37,14 @@ export const options = {
 const labels = ["PP", "P", "M", "G", "GG"];
 
 interface ResultChartProps {
-  usersInRoom: UsersInRoom[];
+  result: UsersInRoom[] | undefined;
   roomId: string;
 }
 
-export function ResultChart({ usersInRoom, roomId }: ResultChartProps) {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const localStorageUsers: LocalStorageData = JSON.parse(
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
-    window.localStorage.getItem(`${roomId}-vote`),
-  );
+export function ResultChart({ result, roomId }: ResultChartProps) {
   const getVotesByType = (type: string) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-    return localStorageUsers?.users.filter(
-      (user: UsersInRoom) => user.choose === type,
-    );
+    return result?.filter((user: UsersInRoom) => user.choose === type);
   };
 
   const data = () => {
@@ -61,7 +53,7 @@ export function ResultChart({ usersInRoom, roomId }: ResultChartProps) {
       datasets: [
         {
           label: "Votos",
-          data: labels.map((p) => getVotesByType(p).length),
+          data: labels.map((p) => getVotesByType(p)?.length ?? []),
           backgroundColor: "rgb(79, 70, 229)",
           borderColor: "rgb(79, 70, 229)",
         },

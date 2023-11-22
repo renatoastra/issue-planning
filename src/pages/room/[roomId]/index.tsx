@@ -78,6 +78,7 @@ const Page = ({ roomId, userId, description, link, title }: PageProps) => {
     handleRevealVote,
     handleInitTimer,
     formatedTimer,
+    isMutatingVote,
   } = usePusher({ roomId });
   const [value, copy] = useCopyToClipboard();
 
@@ -265,30 +266,35 @@ const Page = ({ roomId, userId, description, link, title }: PageProps) => {
                       title="PP"
                       description="Ja ta pronto e testado"
                       currentChoice={getMyVote?.choose === "PP"}
+                      isLoading={isMutatingVote}
                     />
                     <VoteCard
                       onClick={() => handleCreateVote("P")}
                       title="P"
                       description="Faço de olhos fechados"
                       currentChoice={getMyVote?.choose === "P"}
+                      isLoading={isMutatingVote}
                     />
                     <VoteCard
                       onClick={() => handleCreateVote("M")}
                       title="M"
                       description="P com gordurinha"
                       currentChoice={getMyVote?.choose === "M"}
+                      isLoading={isMutatingVote}
                     />
                     <VoteCard
                       onClick={() => handleCreateVote("G")}
                       title="G"
                       description="Vai demorar"
                       currentChoice={getMyVote?.choose === "G"}
+                      isLoading={isMutatingVote}
                     />
                     <VoteCard
                       onClick={() => handleCreateVote("GG")}
                       title="GG"
                       description="Dificil para car#@#!@#"
                       currentChoice={getMyVote?.choose === "GG"}
+                      isLoading={isMutatingVote}
                     />
                   </div>
                 )}

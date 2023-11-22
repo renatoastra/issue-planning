@@ -79,6 +79,9 @@ export const roomRouter = createTRPCRouter({
           data: {
             value: value,
           },
+          select: {
+            id: true,
+          },
         });
 
         return query;
@@ -89,6 +92,9 @@ export const roomRouter = createTRPCRouter({
           value: value,
           room: { connect: { id: roomId } },
           user: { connect: { id: userId } },
+        },
+        select: {
+          id: true,
         },
       });
 
@@ -329,5 +335,30 @@ export const roomRouter = createTRPCRouter({
         console.log(err);
         return { message: err };
       }
+    }),
+  getResult: protectedProcedure
+    .input(z.object({ roomId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const { roomId } = input;
+
+      const query = await ctx.db.votes.findMany({
+        where: {
+          roomId: roomId,
+        },
+        include: {
+          user: true,
+        },
+      });
+
+      const users = query.map((vote) => {
+        return {
+          id: vote.user.id,
+          username: vote.user.name,
+          choose: vote.value,
+          user_image_url: vote.user.image,
+          voted: true,
+        };
+      });
+      return users;
     }),
 });

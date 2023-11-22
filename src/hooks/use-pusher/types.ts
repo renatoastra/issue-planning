@@ -1,4 +1,4 @@
-import { type UsersInRoom } from "@/types/users-in-room";
+import { type UsersInRoom, type UsersInRoom } from "@/types/users-in-room";
 
 type RemovedMemberInfo = {
   id: string;
@@ -53,4 +53,12 @@ export type RemoveMemberResponse = {
   roomId: string;
   users: UsersInRoom[];
   memberIdToRemove: string;
+};
+
+export type Room = {
+  me: UsersInRoom;
+  id: string;
+  status: string;
+  timer: number | null;
+  users: UsersInRoom[];
 };
