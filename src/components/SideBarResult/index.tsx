@@ -28,6 +28,7 @@ export const SideBarVoteResult = ({
             <>
               <div className="flex items-center justify-between gap-2  p-3  text-sm hover:bg-secondary hover:bg-opacity-95">
                 <UserAvatar
+                  className="h-8 w-8 rounded-full"
                   src={user?.user_image_url ?? ""}
                   fallback={user?.username ?? ""}
                 />
@@ -39,7 +40,7 @@ export const SideBarVoteResult = ({
                   </p>
                   {roomOwnerId === user?.id && (
                     <div title="Room leader" className="text-start">
-                      <span className="text-xl">👑</span>
+                      <span className="text-xs">👑</span>
                     </div>
                   )}
                 </div>
