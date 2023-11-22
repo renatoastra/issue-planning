@@ -64,7 +64,6 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
       await fetch("/api/reset-vote", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-
         body: JSON.stringify(payload),
       });
     } catch (error) {
@@ -169,7 +168,6 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
     channel.bind(
       "pusher:subscription_succeeded",
       (members: MembersResponse) => {
-        console.log("🚀 ~ members:", members);
         const userResponse = Object.values(
           members.members,
         ) as unknown as UsersInRoom[];
