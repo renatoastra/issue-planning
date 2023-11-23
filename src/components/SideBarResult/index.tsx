@@ -19,10 +19,21 @@ export const SideBarVoteResult = ({
   };
 
   const userArray = getVoteByValue(voteValue, users);
+  const title = `${voteValue} `;
+  const totalVotes = `${
+    userArray.length > 0
+      ? userArray.length === 1
+        ? userArray.length + " voto"
+        : userArray.length + "votos"
+      : ""
+  }`;
   return (
     <div className="border-b border-indigo-300 dark:border-secondary">
-      <h3 className="text-2xl font-bold">
-        {`${voteValue} `}{" "}
+      <h3 className="flex items-center justify-between text-2xl font-bold">
+        {title}{" "}
+        <span className="text-sm font-normal text-indigo-300 dark:text-slate-500">
+          {totalVotes}
+        </span>
         {voteValue === "🍆" && <span className="font-thin">( ͡° ͜ʖ ͡°) </span>}{" "}
       </h3>
       {userArray.length > 0 &&

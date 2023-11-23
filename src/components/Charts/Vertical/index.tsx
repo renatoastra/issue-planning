@@ -37,16 +37,12 @@ const labels = ["PP", "P", "M", "G", "GG"];
 
 interface ResultChartProps {
   result: UsersInRoom[] | undefined;
-  roomId: string;
 }
 
-export function ResultChart({ result, roomId }: ResultChartProps) {
+export function ResultChart({ result }: ResultChartProps) {
   const getVotesByType = (type: string) => {
     return result?.filter((user: UsersInRoom) => user.choose === type);
   };
-
-  console.log();
-
   const data = () => {
     return {
       labels,
@@ -54,8 +50,9 @@ export function ResultChart({ result, roomId }: ResultChartProps) {
         {
           label: "Votos",
           data: labels.map((p) => getVotesByType(p)?.length ?? 0),
-          backgroundColor: "rgb(79, 70, 229)",
+          backgroundColor: "rgb(165, 180, 252)",
           borderColor: "rgb(79, 70, 229)",
+          borderWidth: 1,
         },
       ],
     };

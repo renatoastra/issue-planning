@@ -6,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { usePusher } from "@/hooks/use-pusher/usePusher";
 import { PrismaClient } from "@prisma/client";
-import { Link } from "lucide-react";
+import { Link, Timer } from "lucide-react";
 import { type GetServerSidePropsContext } from "next";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import { VotedSection } from "../../../view/VotedSection";
 import { Input } from "@/components/ui/input";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard/useCopyToClipboard";
 import { LoadingSpinner } from "@/components/Loading";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { sliceUsername } from "@/utils/slice-username";
 import { RemoveUserDropDown } from "@/components/RemoveUserDropDown";
 import { ToolTip } from "@/components/Tooltip";
@@ -206,9 +206,11 @@ const Page = ({ roomId, userId, link, title }: PageProps) => {
                   value={`- Avaliar o trabalho com todas as stacks envolvidas. 
 - Avaliar o tempo gasto com possíveis ajustes que ocorram durante a issue.`}
                 />
-                <div className="w-full items-center  text-center text-xl 2xl:text-4xl">
-                  {formatedTimer}
-                </div>
+                {step === ROOM_STATUS.VOTING && (
+                  <div className="flex w-full items-center justify-center gap-4 text-center text-xl 2xl:text-4xl">
+                    <Timer /> {formatedTimer}
+                  </div>
+                )}
               </div>
               {roomOwner && (
                 <div className="flex flex-col gap-2">
