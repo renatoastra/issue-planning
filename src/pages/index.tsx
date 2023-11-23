@@ -14,7 +14,7 @@ export default function Home() {
   const router = useRouter();
 
   const { mutateAsync } = api.room.create.useMutation({
-    async onSuccess(data, variables, context) {
+    async onSuccess(data) {
       await router.push(`/room/${data?.id}`);
     },
   });
@@ -64,11 +64,6 @@ export default function Home() {
   };
   return (
     <>
-      <Head>
-        <title>ISSUE PLANNING</title>
-        <meta name="description" content="Vote no peso da sua issue" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
       <main className="flex h-full flex-col items-center  justify-center bg-gradient-to-b  ">
         {!data && (
           <Button

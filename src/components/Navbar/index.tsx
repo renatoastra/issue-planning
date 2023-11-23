@@ -8,7 +8,7 @@ export const Navbar = () => {
   return (
     <div className="flex w-full items-center justify-between border-b border-primary-foreground bg-gradient-to-tr px-4 py-6 shadow-md">
       <Link title="Gebra planning" href={"/"} className="text-primary">
-        <span className={`mr-1 text-3xl`}>🍆</span> Planning
+        <span className={`mr-1 text-3xl`}>🍆</span> Gebra Planning
       </Link>
 
       <div className="flex items-center gap-4">

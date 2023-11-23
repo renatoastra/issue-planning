@@ -8,7 +8,7 @@ import clsx from "clsx";
 
 interface VoteCardProps {
   title: string;
-  description: string;
+  description?: string;
   onClick?: () => void;
   currentChoice?: boolean;
   isLoading: boolean;
@@ -33,15 +33,8 @@ export const VoteCard = ({
           isLoading && "cursor-not-allowed",
         )}
       >
-        <CardHeader className="w-full ">
-          <CardTitle className="m-auto text-4xl">{title}</CardTitle>
-          <CardDescription
-            className={`m-auto w-full text-center  ${
-              currentChoice ? " text-white" : ""
-            }`}
-          >
-            {description}
-          </CardDescription>
+        <CardHeader className="h-full w-full ">
+          <CardTitle className="m-auto text-6xl">{title}</CardTitle>
         </CardHeader>
       </Card>
     </button>

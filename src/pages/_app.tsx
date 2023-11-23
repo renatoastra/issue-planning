@@ -11,8 +11,8 @@ import { Toaster } from "@/components/ui/toaster";
 
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Footer } from "@/components/Footer";
 import { VoteResultContextProvider } from "@/context/vote-result";
+import Head from "next/head";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -25,6 +25,11 @@ const MyApp: AppType<{ session: Session | null }> = ({
           <ToastContainer />
           <Toaster />
           <Navbar />
+          <Head>
+            <title>GEBRA PLANNING </title>
+            <meta name="description" content="Vote no peso da sua issue" />
+            <link rel="icon" href="/gebra-icon.svg" />
+          </Head>
           <div className="xl:h-[calc(100vh-89px)]">
             <Component {...pageProps} />
           </div>

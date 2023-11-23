@@ -23,6 +23,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 import { type UsersInRoom } from "@/types/users-in-room";
 import { SideBarVoteResult } from "@/components/SideBarResult";
+import Head from "next/head";
 
 type PageProps = {
   roomId: string;
@@ -99,10 +100,15 @@ const Page = ({ roomId, userId, link, title }: PageProps) => {
 
   const allUsersVoted = usersInRoom?.filter((user) => user.voted === true);
 
-  const labels = ["PP", "P", "M", "G", "GG"];
+  const labels = ["PP", "P", "M", "G", "GG", "🍆"];
 
   return (
     <>
+      <Head>
+        <title>GEBRA PLANNING - Voting Room</title>
+        <meta name="description" content="Vote no peso da sua issue" />
+        <link rel="icon" href="/gebra-icon.svg" />
+      </Head>
       <div className="relative flex h-full w-full  items-center  ">
         <div className="absolute right-0 h-full overflow-y-auto border-l  border-l-secondary bg-primary-foreground xl:w-60   ">
           {step === ROOM_STATUS.VOTING && (
@@ -268,23 +274,6 @@ const Page = ({ roomId, userId, link, title }: PageProps) => {
                           Resetar todos os votos e voltar para votação
                         </p>
                       </div>
-                      {/* <div>
-                        <Button
-                          className="mb-4 w-[200px] cursor-pointer"
-                          disabled={!allUsersVoted}
-                          onClick={async () =>
-                            mutateRoomStatus(ROOM_STATUS.CLOSED, "close-room")
-                          }
-                        >
-                          <LoadingSpinner
-                            text="Fechar votacão"
-                            isLoading={isLoading}
-                          />
-                        </Button>
-                        <p className="text-xs text-primary">
-                          Finalizar a votação
-                        </p>
-                      </div> */}
                     </div>
                   )}
 
@@ -307,36 +296,37 @@ const Page = ({ roomId, userId, link, title }: PageProps) => {
                     <VoteCard
                       onClick={() => handleCreateVote("PP")}
                       title="PP"
-                      description="Ja ta pronto e testado"
                       currentChoice={getMyVote?.choose === "PP"}
                       isLoading={isMutatingVote}
                     />
                     <VoteCard
                       onClick={() => handleCreateVote("P")}
                       title="P"
-                      description="Faço de olhos fechados"
                       currentChoice={getMyVote?.choose === "P"}
                       isLoading={isMutatingVote}
                     />
                     <VoteCard
                       onClick={() => handleCreateVote("M")}
                       title="M"
-                      description="P com gordurinha"
                       currentChoice={getMyVote?.choose === "M"}
                       isLoading={isMutatingVote}
                     />
                     <VoteCard
                       onClick={() => handleCreateVote("G")}
                       title="G"
-                      description="Vai demorar"
                       currentChoice={getMyVote?.choose === "G"}
                       isLoading={isMutatingVote}
                     />
                     <VoteCard
                       onClick={() => handleCreateVote("GG")}
                       title="GG"
-                      description="Dificil para car#@#!@#"
                       currentChoice={getMyVote?.choose === "GG"}
+                      isLoading={isMutatingVote}
+                    />
+                    <VoteCard
+                      onClick={() => handleCreateVote("🍆")}
+                      title="🍆"
+                      currentChoice={getMyVote?.choose === "🍆"}
                       isLoading={isMutatingVote}
                     />
                   </div>

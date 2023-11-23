@@ -127,6 +127,7 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
       pusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
         cluster: process.env.NEXT_PUBLIC_SOKETI_CLUSTER!,
         forceTLS: false,
+
         enabledTransports: ["ws", "wss"],
         authEndpoint: "/api/pusher",
         userAuthentication: {
