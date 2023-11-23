@@ -6,7 +6,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { usePusher } from "@/hooks/use-pusher/usePusher";
 import { PrismaClient } from "@prisma/client";
-import { Crown, Link, Timer } from "lucide-react";
+import {
+  Crown,
+  Link,
+  MousePointerClick,
+  PartyPopper,
+  Timer,
+} from "lucide-react";
 import { type GetServerSidePropsContext } from "next";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -101,7 +107,23 @@ const Page = ({ roomId, userId, link, title }: PageProps) => {
   const allUsersVoted = usersInRoom?.filter((user) => user.voted === true);
 
   const labels = ["PP", "P", "M", "G", "GG", "🍆"];
-
+  const handleCopyRoomUrl = async () => {
+    await copy(window.location.href);
+    toast({
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-ignore
+      title: (
+        <span className="flex items-center justify-between">
+          Link copiado! <PartyPopper />
+        </span>
+      ),
+      description: (
+        <span className="">
+          O link foi copiado para sua área de transferência
+        </span>
+      ),
+    });
+  };
   return (
     <>
       <Head>
@@ -173,11 +195,17 @@ const Page = ({ roomId, userId, link, title }: PageProps) => {
                 <h3 className="flex items-center gap-2 text-xl font-bold">
                   Issue:
                 </h3>
-                <Input
-                  disabled
-                  className="w-full bg-primary-foreground"
-                  value={title}
-                />
+                <div className="flex items-center justify-between">
+                  <Input
+                    disabled
+                    className="w-[70%] bg-primary-foreground"
+                    value={title}
+                  />
+                  <Button onClick={handleCopyRoomUrl} className="gap-3">
+                    Convidar colegas
+                    <MousePointerClick />
+                  </Button>
+                </div>
               </div>
               <div
                 onClick={handleCopyLink}
