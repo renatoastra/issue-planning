@@ -25,11 +25,12 @@ import { useEffect, useState } from "react";
 import { sliceUsername } from "@/utils/slice-username";
 import { RemoveUserDropDown } from "@/components/RemoveUserDropDown";
 import { ToolTip } from "@/components/Tooltip";
-import { useToast } from "@/components/ui/use-toast";
+import { toast, useToast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 import { type UsersInRoom } from "@/types/users-in-room";
 import { SideBarVoteResult } from "@/components/SideBarResult";
 import Head from "next/head";
+import link from "next/link";
 
 type PageProps = {
   roomId: string;
@@ -95,6 +96,10 @@ const Page = ({ roomId, userId, link, title }: PageProps) => {
   const [handleTimer, setHandleTimer] = useState(0);
   const { toast } = useToast();
   const roomOwner = userId === data?.user.id;
+  const { data: result } = api.room.getResult.useQuery(
+    { roomId },
+    { enabled: step === ROOM_STATUS.VOTED },
+  );
 
   const handleCopyLink = async () => {
     await copy(link);
@@ -103,8 +108,6 @@ const Page = ({ roomId, userId, link, title }: PageProps) => {
       description: "O link foi copiado para sua área de transferência",
     });
   };
-
-  const allUsersVoted = usersInRoom?.filter((user) => user.voted === true);
 
   const labels = ["PP", "P", "M", "G", "GG", "🍆"];
   const handleCopyRoomUrl = async () => {
@@ -179,7 +182,7 @@ const Page = ({ roomId, userId, link, title }: PageProps) => {
                 {labels.map((label) => (
                   <SideBarVoteResult
                     key={label}
-                    users={allUsersVoted}
+                    users={result}
                     roomOwnerId={userId}
                     voteValue={label}
                   />

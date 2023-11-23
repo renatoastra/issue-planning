@@ -1,12 +1,12 @@
-import { type UsersInRoom } from "@/types/users-in-room";
 import { UserAvatar } from "../Avatar";
 import { Checkbox } from "@radix-ui/react-checkbox";
 import { sliceUsername } from "@/utils/slice-username";
 import { Crown } from "lucide-react";
+import { type GetResult } from "@/types/room-procedure-output";
 
 interface SideBarVoteResultProps {
   roomOwnerId: string;
-  users: UsersInRoom[];
+  users: GetResult | undefined;
   voteValue: string;
 }
 
@@ -15,17 +15,17 @@ export const SideBarVoteResult = ({
   roomOwnerId,
   voteValue,
 }: SideBarVoteResultProps) => {
-  const getVoteByValue = (value: string, users: UsersInRoom[]) => {
+  const getVoteByValue = (value: string, users: GetResult | undefined) => {
     return users?.filter((user) => user.choose === value);
   };
 
   const userArray = getVoteByValue(voteValue, users);
   const title = `${voteValue} `;
   const totalVotes = `${
-    userArray.length > 0
+    userArray && userArray?.length > 0
       ? userArray.length === 1
         ? userArray.length + " voto"
-        : userArray.length + "votos"
+        : userArray.length + " votos"
       : ""
   }`;
   return (
@@ -37,7 +37,8 @@ export const SideBarVoteResult = ({
         </span>
         {voteValue === "🍆" && <span className="font-thin">( ͡° ͜ʖ ͡°) </span>}{" "}
       </h3>
-      {userArray.length > 0 &&
+      {userArray &&
+        userArray?.length > 0 &&
         userArray?.map((user) => {
           return (
             <>
@@ -64,7 +65,7 @@ export const SideBarVoteResult = ({
             </>
           );
         })}
-      {!userArray.length && (
+      {!userArray?.length && (
         <div className="flex items-center justify-between  gap-2 p-3  text-sm hover:bg-secondary hover:bg-opacity-95">
           <p>Nenhum voto </p>
         </div>
