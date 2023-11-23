@@ -319,7 +319,7 @@ const Page = ({ roomId, userId, link, title }: PageProps) => {
             </div>
             {step === ROOM_STATUS.VOTED ? (
               <div className="flex h-52  w-full items-center justify-center xl:h-80">
-                <VotedSection roomId={roomId} usersInRoom={usersInRoom} />
+                <VotedSection roomId={roomId} />
               </div>
             ) : (
               <>
