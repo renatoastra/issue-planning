@@ -2,6 +2,7 @@ import { type UsersInRoom } from "@/types/users-in-room";
 import { UserAvatar } from "../Avatar";
 import { Checkbox } from "@radix-ui/react-checkbox";
 import { sliceUsername } from "@/utils/slice-username";
+import { Crown } from "lucide-react";
 
 interface SideBarVoteResultProps {
   roomOwnerId: string;
@@ -54,7 +55,7 @@ export const SideBarVoteResult = ({
                   </p>
                   {roomOwnerId === user?.id && (
                     <div title="Room leader" className="text-start">
-                      <span className="text-xs">👑</span>
+                      <Crown size={16} />
                     </div>
                   )}
                 </div>

@@ -6,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { usePusher } from "@/hooks/use-pusher/usePusher";
 import { PrismaClient } from "@prisma/client";
-import { Link, Timer } from "lucide-react";
+import { Crown, Link, Timer } from "lucide-react";
 import { type GetServerSidePropsContext } from "next";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
@@ -136,7 +136,9 @@ const Page = ({ roomId, userId, link, title }: PageProps) => {
                           </p>
                           {userId === user?.id && (
                             <div title="Room leader" className="text-start">
-                              <span className="text-xl">👑</span>
+                              <span className="text-sm">
+                                <Crown size={18} />
+                              </span>
                             </div>
                           )}
                         </div>
