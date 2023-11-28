@@ -27,10 +27,12 @@ import { RemoveUserDropDown } from "@/components/RemoveUserDropDown";
 import { ToolTip } from "@/components/Tooltip";
 import { toast, useToast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
-import { type UsersInRoom } from "@/types/users-in-room";
 import { SideBarVoteResult } from "@/components/SideBarResult";
 import Head from "next/head";
-import link from "next/link";
+import Image from "next/image";
+
+import joaoImg from "@/assets/joao.png";
+import { useRouter } from "next/router";
 
 type PageProps = {
   roomId: string;
@@ -95,6 +97,7 @@ const Page = ({ roomId, userId, link, title }: PageProps) => {
 
   const [handleTimer, setHandleTimer] = useState(0);
   const { toast } = useToast();
+  const router = useRouter();
   const roomOwner = userId === data?.user.id;
   const { data: result } = api.room.getResult.useQuery(
     { roomId },
@@ -134,7 +137,20 @@ const Page = ({ roomId, userId, link, title }: PageProps) => {
         <meta name="description" content="Vote no peso da sua issue" />
         <link rel="icon" href="/gebra-icon.svg" />
       </Head>
-      <div className="relative flex h-full w-full  items-center  ">
+      <div className=" relative flex h-full w-full  items-center  ">
+        <div className="absolute left-0 hidden px-12 2xl:block">
+          <a
+            className="flex flex-col gap-3"
+            href="https://www.youtube.com/watch?v=tl9WC-OPP18"
+            target="_blank"
+          >
+            <p className="text-xl">Feliz aniversário</p>
+            <p className="flex items-center gap-3 text-2xl font-bold">
+              João! 🎉🥳🎈
+            </p>
+            <Image src={joaoImg.src} width={100} height={100} alt="joao-anao" />
+          </a>
+        </div>
         <div className="absolute right-0 h-full overflow-y-auto border-l  border-l-secondary bg-primary-foreground xl:w-60   ">
           {step === ROOM_STATUS.VOTING && (
             <>
