@@ -1,32 +1,19 @@
 /* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
-import { UserAvatar } from "@/components/Avatar";
 import { VoteCard } from "@/components/VoteCard";
 import { UserDialog } from "@/components/Dialog";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { usePusher } from "@/hooks/use-pusher/usePusher";
 
-import {
-  Crown,
-  Link,
-  MousePointerClick,
-  PartyPopper,
-  Timer,
-} from "lucide-react";
+import { Link, MousePointerClick, Timer } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { ROOM_STATUS } from "@/enum/status";
 import { VotedSection } from "../VotedSection";
 import { Input } from "@/components/ui/input";
 import { LoadingSpinner } from "@/components/Loading";
-import { sliceUsername } from "@/utils/slice-username";
-import { RemoveUserDropDown } from "@/components/RemoveUserDropDown";
 import { ToolTip } from "@/components/Tooltip";
-import { api } from "@/utils/api";
-import { SideBarVoteResult } from "@/components/SideBarResult";
 import Head from "next/head";
 import Image from "next/image";
-import { AnimatePresence, motion, useCycle } from "framer-motion";
 
 import joaoImg from "@/assets/joao.png";
 import { FadedComponent } from "@/components/FadedComponent";
@@ -40,17 +27,8 @@ interface RoomProps {
 }
 
 export const Room = ({ id }: RoomProps) => {
-  const { data } = useSession();
-  const {
-    roomId,
-    roomOwnerId,
-    link,
-    title,
-    usersInRoom,
-    step,
-    isLoggedUserAdmin,
-    labels,
-  } = useContext(RoomContext);
+  const { roomId, link, title, step, isLoggedUserAdmin } =
+    useContext(RoomContext);
   const {
     canRevealVote,
     getMyVote,
