@@ -1,6 +1,6 @@
 import { useSession } from "next-auth/react";
 import Pusher from "pusher-js";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import {
   type AddedMemberResponse,
   type VoteApiResponse,
@@ -15,6 +15,8 @@ import { type UsersInRoom } from "@/types/users-in-room";
 import { type MembersResponse } from "@/types/members";
 import { useTimer } from "../use-timer/useTimer";
 import { useRouter } from "next/router";
+import { RoomContext } from "@/context/room-data";
+import { RoomApiContext } from "@/context/room-data/fetch";
 
 Pusher.logToConsole = false;
 interface UsePusherProps {
@@ -25,28 +27,30 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
   const pusherRef = useRef<Pusher>();
   const { data } = useSession();
   const router = useRouter();
-  const [step, setStep] = useState("");
-  const [usersInRoom, setUsersInRoom] = useState<UsersInRoom[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [cardIsLoading, setCardIsLoading] = useState(false);
-  const { data: getRoom } = api.room.getByRoomId.useQuery({
-    id: roomId,
-  });
+  const { setUsersInRoom, usersInRoom, setStep, step } =
+    useContext(RoomContext);
+
+  const {
+    getRoomDataRefetch,
+    isMutatingVote,
+    onInsertVote,
+    onResetRoom,
+    onRevealRoom,
+    onSetTimer,
+    roomData,
+    getRoom,
+  } = useContext(RoomApiContext);
   const { formatedTimer, setTimer, isTimerRunning } = useTimer();
 
-  const { data: roomData, refetch: getRoomDataRefetch } =
-    api.room.getRoomData.useQuery({ roomId });
-  const { mutateAsync: onInsertVote, isLoading: isMutatingVote } =
-    api.room.createVote.useMutation();
-  const { mutateAsync: onRevealRoom } = api.room.revealRoom.useMutation({});
-  const { mutateAsync: onResetRoom } = api.room.resetRoom.useMutation({});
-  const { mutateAsync: onSetTimer } = api.room.setTimer.useMutation({});
-  const getMyVote = usersInRoom.find((user) => user?.id === data?.user.id);
+  const [isLoading, setIsLoading] = useState(false);
+  const [cardIsLoading, setCardIsLoading] = useState(false);
 
+  const getMyVote = usersInRoom.find((user) => user?.id === data?.user.id);
   const pusher = pusherRef.current;
+
   const canRevealVote =
     usersInRoom.every((user) => user?.voted) ||
-    step === "voted" ||
+    step === ROOM_STATUS.VOTED ||
     !isTimerRunning;
 
   const handleResetVote = async () => {
