@@ -138,7 +138,7 @@ export const Room = ({ id }: RoomProps) => {
 - Avaliar o tempo gasto com possíveis ajustes que ocorram durante a issue.`}
                 />
                 {step === ROOM_STATUS.VOTING && (
-                  <div className="flex w-full items-center justify-center gap-4 text-center text-4xl text-xl">
+                  <div className="flex w-full items-center justify-center gap-4 text-center text-4xl ">
                     <Timer size={32} /> {formatedTimer}
                   </div>
                 )}
