@@ -70,7 +70,8 @@ const Page = ({ roomId, userId, link, title }: PageProps) => {
             >
               <p className="font-bold text-white">
                 {" "}
-                Feliz aniversário joao! 🎉🥳🎈
+                Voce sabia? Além de UX, André também descobriu uma nova paixão:
+                Jacarés-Madeiras.
               </p>
               <button
                 className="absolute right-3"

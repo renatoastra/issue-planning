@@ -5,7 +5,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { usePusher } from "@/hooks/use-pusher/usePusher";
 
 import { Link, MousePointerClick, Timer } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { ROOM_STATUS } from "@/enum/status";
 import { VotedSection } from "../VotedSection";
@@ -13,9 +12,7 @@ import { Input } from "@/components/ui/input";
 import { LoadingSpinner } from "@/components/Loading";
 import { ToolTip } from "@/components/Tooltip";
 import Head from "next/head";
-import Image from "next/image";
 
-import joaoImg from "@/assets/joao.png";
 import { FadedComponent } from "@/components/FadedComponent";
 import { useContext, useState } from "react";
 import { RoomContext } from "@/context/room-data";
@@ -53,7 +50,7 @@ export const Room = ({ id }: RoomProps) => {
         <link rel="icon" href="/gebra-icon.svg" />
       </Head>
       <div className="relative flex h-[calc(100vh-89px)] w-full  items-center  ">
-        <div className="absolute left-0  px-12 2xl:block">
+        {/* <div className="absolute left-0  px-12 2xl:block">
           <a
             className="flex flex-col gap-3"
             href="https://www.youtube.com/watch?v=tl9WC-OPP18"
@@ -65,7 +62,7 @@ export const Room = ({ id }: RoomProps) => {
             <p className="w-40 break-words">Clique aqui e saiba mais</p>
             <Image src={joaoImg.src} width={100} height={100} alt="joao-anao" />
           </a>
-        </div>
+        </div> */}
         <UserSideBar />
         <FadedComponent className="flex h-full  w-[calc(100%-12.23rem)] flex-col   items-center justify-between  gap-6  ">
           <div className="flex h-full flex-col items-center justify-between py-8 xl:w-[42rem]">
