@@ -1,7 +1,7 @@
 interface SessionType {
   user: User;
   expires: Date;
-} || null
+}
 
 interface User {
   name: string;
