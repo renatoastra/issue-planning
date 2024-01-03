@@ -70,8 +70,7 @@ const Page = ({ roomId, userId, link, title }: PageProps) => {
             >
               <p className="font-bold text-white">
                 {" "}
-                Voce sabia? Além de UX, André também descobriu uma nova paixão:
-                Jacarés-Madeiras.
+                Feliz ano novo galera!! 🎉🎇🥂
               </p>
               <button
                 className="absolute right-3"
