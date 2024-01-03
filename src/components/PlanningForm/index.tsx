@@ -12,20 +12,22 @@ import React from "react";
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
 import { RotatingLines } from "react-loader-spinner";
+import { ArrowBigRight } from "lucide-react";
 
 interface PlanningFormProps {
   children: React.ReactNode;
   onSubmit: () => void;
   loading?: boolean;
 }
-export const PlanningForm = ({
-  children,
-  onSubmit,
-  loading,
-}: PlanningFormProps) => {
+export const PlanningForm = ({ onSubmit, loading }: PlanningFormProps) => {
   return (
     <Dialog>
-      <DialogTrigger>{children}</DialogTrigger>
+      <DialogTrigger asChild>
+        <Button className="w-60" variant="default">
+          Create room
+          <ArrowBigRight size={25} />
+        </Button>
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="my-5 text-3xl">

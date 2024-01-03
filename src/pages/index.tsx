@@ -1,5 +1,4 @@
 import { signIn, useSession } from "next-auth/react";
-import Head from "next/head";
 
 import { api } from "@/utils/api";
 import { useRouter } from "next/router";
@@ -8,9 +7,31 @@ import { Button } from "@/components/ui/button";
 import { PlanningForm } from "@/components/PlanningForm";
 import { toast } from "react-toastify";
 import { useState } from "react";
+import { type GetServerSidePropsContext } from "next";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/server/auth";
+import { type SessionType } from "@/types/user-type";
 
-export default function Home() {
-  const { data } = useSession();
+export const getServerSideProps = async (
+  context: GetServerSidePropsContext,
+) => {
+  const session: SessionType | null = await getServerSession(
+    context.req,
+    context.res,
+    authOptions,
+  );
+  return {
+    props: {
+      user: session,
+    },
+  };
+};
+
+interface PageProps {
+  user: SessionType | null;
+}
+
+export default function Home({ user }: PageProps) {
   const router = useRouter();
 
   const { mutateAsync } = api.room.create.useMutation({
@@ -65,7 +86,7 @@ export default function Home() {
   return (
     <>
       <main className="flex h-full flex-col items-center  justify-center bg-gradient-to-b  ">
-        {!data && (
+        {!user?.user && (
           <Button
             onClick={() => signIn("discord")}
             className="w-60"
@@ -75,15 +96,10 @@ export default function Home() {
           </Button>
         )}
 
-        {data && (
+        {user?.user && (
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
-          <PlanningForm loading={isLoading} onSubmit={handleCreateRoom}>
-            <Button className="w-60" variant="default">
-              Create room
-              <ArrowBigRight size={25} />
-            </Button>
-          </PlanningForm>
+          <PlanningForm loading={isLoading} onSubmit={handleCreateRoom} />
         )}
       </main>
     </>
