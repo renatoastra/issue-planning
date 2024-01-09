@@ -19,6 +19,12 @@ import { RoomContext } from "@/context/room-data";
 import { useCopyLinks } from "./hooks/use-copy-links";
 import { UserSideBar } from "@/components/Sidebar";
 
+import imgJean from "@/assets/jeanzou.png";
+import imgMathito from "@/assets/mathito.png";
+import joaoImg from "@/assets/anao.png";
+import robertaImg from "@/assets/roberta.png";
+import jhemersonImg from "@/assets/Screenshot from 2024-01-09 14-29-57.png";
+
 interface RoomProps {
   id: string;
 }
@@ -193,30 +199,35 @@ export const Room = ({ id }: RoomProps) => {
                       title="PP"
                       currentChoice={getMyVote?.choose === "PP"}
                       isLoading={isMutatingVote}
+                      src={imgJean.src}
                     />
                     <VoteCard
                       onClick={() => handleCreateVote("P")}
                       title="P"
                       currentChoice={getMyVote?.choose === "P"}
                       isLoading={isMutatingVote}
+                      src={imgMathito.src}
                     />
                     <VoteCard
                       onClick={() => handleCreateVote("M")}
                       title="M"
                       currentChoice={getMyVote?.choose === "M"}
                       isLoading={isMutatingVote}
+                      src={robertaImg.src}
                     />
                     <VoteCard
                       onClick={() => handleCreateVote("G")}
                       title="G"
                       currentChoice={getMyVote?.choose === "G"}
                       isLoading={isMutatingVote}
+                      src={joaoImg.src}
                     />
                     <VoteCard
                       onClick={() => handleCreateVote("GG")}
                       title="GG"
                       currentChoice={getMyVote?.choose === "GG"}
                       isLoading={isMutatingVote}
+                      src={jhemersonImg.src}
                     />
                     <VoteCard
                       onClick={() => handleCreateVote("🍆")}

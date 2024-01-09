@@ -1,10 +1,6 @@
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import clsx from "clsx";
+import Image from "next/image";
 
 interface VoteCardProps {
   title: string;
@@ -12,6 +8,7 @@ interface VoteCardProps {
   onClick?: () => void;
   currentChoice?: boolean;
   isLoading: boolean;
+  src?: string;
 }
 export const VoteCard = ({
   description,
@@ -19,6 +16,7 @@ export const VoteCard = ({
   onClick,
   currentChoice,
   isLoading,
+  src,
 }: VoteCardProps) => {
   return (
     <button
@@ -35,6 +33,9 @@ export const VoteCard = ({
       >
         <CardHeader className="h-full w-full ">
           <CardTitle className="m-auto text-6xl">{title}</CardTitle>
+          <div className="flex w-full items-center justify-center rounded-lg">
+            {src && <Image src={src} width={70} height={70} alt="" />}
+          </div>
         </CardHeader>
       </Card>
     </button>
