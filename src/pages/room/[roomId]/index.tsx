@@ -68,10 +68,7 @@ const Page = ({ roomId, userId, link, title }: PageProps) => {
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <p className="font-bold text-white">
-                {" "}
-                Feliz ano novo galera!! 🎉🎇🥂
-              </p>
+              <p className="font-bold text-white"> 1, 2, 3... 🍁 Vote! </p>
               <button
                 className="absolute right-3"
                 onClick={() => setEventMsg(false)}
