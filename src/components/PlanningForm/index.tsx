@@ -45,12 +45,12 @@ export const PlanningForm = ({ onSubmit, loading }: PlanningFormProps) => {
                 name="planning-link"
                 placeholder="Link"
               />
-              <Textarea
+              {/* <Textarea
                 id="planning-form"
                 name="planning-form"
                 className="h-32 resize-none"
                 placeholder="Descrição"
-              />
+              /> */}
               <Button disabled={loading} type="submit">
                 {loading ? (
                   <RotatingLines
