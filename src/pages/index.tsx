@@ -1,8 +1,7 @@
-import { signIn, useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 
 import { api } from "@/utils/api";
 import { useRouter } from "next/router";
-import { ArrowBigRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PlanningForm } from "@/components/PlanningForm";
 import { toast } from "react-toastify";
@@ -44,9 +43,9 @@ export default function Home({ user }: PageProps) {
   const handleCreateRoom = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const description = event.currentTarget.elements.namedItem(
-      "planning-form",
-    ) as HTMLInputElement | null;
+    // const description = event.currentTarget.elements.namedItem(
+    //   "planning-form",
+    // ) as HTMLInputElement | null;
 
     const title = event.currentTarget.elements.namedItem(
       "planning-title",
@@ -55,10 +54,10 @@ export default function Home({ user }: PageProps) {
     const link = event.currentTarget.elements.namedItem(
       "planning-link",
     ) as HTMLInputElement | null;
-    if (!description?.value || !description.value) {
-      toast.error("Digite o nome da issue");
-      return;
-    }
+    // if (!description?.value || !description.value) {
+    //   toast.error("Digite o nome da issue");
+    //   return;
+    // }
 
     if (!title?.value || !title.value) {
       toast.error("Digite o título da issue");
@@ -73,7 +72,6 @@ export default function Home({ user }: PageProps) {
 
     try {
       await mutateAsync({
-        description: description.value,
         title: title.value,
         link: link.value,
       });
