@@ -1,11 +1,8 @@
-import { signIn, signOut, useSession } from "next-auth/react";
-import { ModeToggle } from "../Theme/ModeToggle";
+import { signIn, useSession } from "next-auth/react";
 import { Button } from "../ui/button";
 import Link from "next/link";
-import logo from "../../../public/gebra-icon.svg";
-import Image from "next/image";
+
 import { UserButton } from "./user-button";
-import { CreateNewRoom } from "../create-room";
 
 export const Navbar = () => {
   const { data } = useSession();
