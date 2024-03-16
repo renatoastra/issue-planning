@@ -66,7 +66,7 @@ export const CollapsedSidebar = ({ cycleOpen }: CollapsedSidebarProps) => {
                       <UserAvatar
                         src={user?.user_image_url ?? ""}
                         fallback={user?.username ?? ""}
-                        className={clsx(`h-11 w-11 border-2 `)}
+                        className={clsx(`h-11 w-11 border-2`)}
                       />
                     </motion.div>
                   </div>

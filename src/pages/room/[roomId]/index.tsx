@@ -51,7 +51,7 @@ export const getServerSideProps = async (
 };
 
 const Page = ({ roomId, userId, link, title }: PageProps) => {
-  const [eventMsg, setEventMsg] = useState(true);
+  const [eventMsg, setEventMsg] = useState(false);
   return (
     <RoomContextProvider
       link={link}
@@ -68,7 +68,7 @@ const Page = ({ roomId, userId, link, title }: PageProps) => {
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <p className="font-bold text-white"> 1, 2, 3... 🍁 Vote! </p>
+              <p className="font-bold text-white">Novidades em breve...</p>
               <button
                 className="absolute right-3"
                 onClick={() => setEventMsg(false)}
