@@ -26,10 +26,6 @@ export const options = {
     legend: {
       position: "top" as const,
     },
-    title: {
-      display: true,
-      text: "Resultado dos votos",
-    },
   },
 };
 
@@ -48,9 +44,9 @@ export function ResultChart({ result }: ResultChartProps) {
       labels,
       datasets: [
         {
-          label: "Votos",
+          label: "Votes",
           data: labels.map((p) => getVotesByType(p)?.length ?? 0),
-          backgroundColor: "rgb(165, 180, 252)",
+          backgroundColor: "rgb(168, 85, 247)",
           borderColor: "rgb(79, 70, 229)",
           borderWidth: 1,
         },

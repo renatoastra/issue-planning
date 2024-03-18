@@ -59,21 +59,21 @@ export default function Home({ user }: PageProps) {
     //   return;
     // }
 
-    if (!title?.value || !title.value) {
-      toast.error("Digite o título da issue");
-      return;
-    }
+    // if (!title?.value || !title.value) {
+    //   toast.error("Digite o título da issue");
+    //   return;
+    // }
 
-    if (!link?.value || !link.value) {
-      toast.error("Digite o link da issue");
-      return;
-    }
+    // if (!link?.value || !link.value) {
+    //   toast.error("Digite o link da issue");
+    //   return;
+    // }
     setIsLoading(true);
 
     try {
       await mutateAsync({
-        title: title.value,
-        link: link.value,
+        title: title?.value,
+        link: link?.value,
       });
     } catch (e) {
       console.log(e);

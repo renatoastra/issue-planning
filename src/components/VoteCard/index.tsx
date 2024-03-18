@@ -27,7 +27,7 @@ export const VoteCard = ({
       <Card
         className={clsx(
           "h-40 w-[128px] cursor-pointer bg-primary-foreground 2xl:h-44 2xl:w-32",
-          currentChoice && "bg-indigo-700 text-white",
+          currentChoice && "bg-purple-500 text-white",
           isLoading && "cursor-not-allowed",
         )}
       >

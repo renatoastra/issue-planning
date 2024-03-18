@@ -26,6 +26,7 @@ interface RoomProps {
 export const Room = ({ id }: RoomProps) => {
   const { roomId, link, title, step, isLoggedUserAdmin } =
     useContext(RoomContext);
+  console.log("🚀 ~ title:", title);
   const {
     canRevealVote,
     getMyVote,
@@ -75,10 +76,10 @@ export const Room = ({ id }: RoomProps) => {
                   <Input
                     disabled
                     className="w-[70%] bg-primary-foreground"
-                    value={title}
+                    value={!!title ? title : "Welcome to the room"}
                   />
                   <Button onClick={handleCopyRoomUrl} className="gap-3">
-                    Convidar colegas
+                    Share room
                     <MousePointerClick />
                   </Button>
                 </div>
@@ -99,13 +100,11 @@ export const Room = ({ id }: RoomProps) => {
                 <Input
                   disabled
                   className="w-full bg-primary-foreground"
-                  value={link}
+                  value={!!link ? link : "No link provided"}
                 />
               </div>
               <div className="flex flex-col gap-3">
-                <h3 className="text-xl font-bold">
-                  Pontos para avaliar no seu critério:
-                </h3>
+                <h3 className="text-xl font-bold">You should vote based on:</h3>
                 <Textarea
                   className="h-38 w-full resize-none bg-primary-foreground"
                   disabled
@@ -129,7 +128,7 @@ export const Room = ({ id }: RoomProps) => {
                           onClick={async () => handleRevealVote()}
                         >
                           <LoadingSpinner
-                            text="Revelar votos"
+                            text="Review votes"
                             isLoading={isLoading}
                           />
                         </Button>
@@ -139,18 +138,21 @@ export const Room = ({ id }: RoomProps) => {
                           type="number"
                           min={0}
                           max={10}
-                          placeholder="Digite um numero"
+                          placeholder="In seconds"
                           onChange={(e) =>
-                            setHandleTimer(Number(e.target.value))
+                            setHandleTimer(Number(e.target.value) / 60)
                           }
                         />
+
                         <Button
                           className=" cursor-pointer"
                           disabled={!handleTimer}
                           onClick={async () => handleInitTimer(handleTimer)}
                         >
                           <LoadingSpinner
-                            text="Iniciar timer"
+                            text={
+                              handleTimer > 0 ? "Reset timer" : "Start timer"
+                            }
                             isLoading={isLoading}
                           />
                         </Button>
@@ -167,12 +169,12 @@ export const Room = ({ id }: RoomProps) => {
                           onClick={async () => handleResetVote()}
                         >
                           <LoadingSpinner
-                            text="Resetar votação"
+                            text="Reset votes"
                             isLoading={isLoading}
                           />
                         </Button>
                         <p className="text-xs text-primary">
-                          Resetar todos os votos e voltar para votação
+                          Reset all votes and back.
                         </p>
                       </div>
                     </div>

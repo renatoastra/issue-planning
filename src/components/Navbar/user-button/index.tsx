@@ -49,32 +49,29 @@ const UserButton = () => {
           </div>
         </DropdownMenuItem>
         <DropdownMenuSeparator className="h-px bg-border" />
-        <div className="mr-2 flex items-center justify-between p-2">
-          <div className="flex items-center">
+        <div className="mr-2 flex w-full items-center justify-between p-2">
+          <div className="flex w-full items-center">
             <Sun className="mr-2 h-4 w-4  rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
             <Moon className="absolute mr-2  h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
             <span className="sr-only">Toggle theme</span>
-            <p className="text-gray-400">Theme</p>
+            <p className="">Theme</p>
           </div>
           <Switch
             onCheckedChange={() => setTheme(theme == "dark" ? "light" : "dark")}
           />
         </div>
 
-        <Link href="/settings">
-          <DropdownMenuItem className="flex cursor-not-allowed items-center justify-between">
-            <div className="flex items-center">
-              <DoorClosed className="mr-2 h-4 w-4" />
-              <span className="text-sm text-gray-400">My rooms</span>
-            </div>
-            <p className="animate-pulse text-xs text-purple-500">Soon</p>
-          </DropdownMenuItem>
-        </Link>
-        <DropdownMenuSeparator className="h-px bg-border" />
-        <DropdownMenuItem>
-          <MessageCircle className="mr-2 h-4 w-4" />
-          Discord
+        <DropdownMenuItem
+          disabled
+          className="flex w-full cursor-not-allowed items-center justify-between"
+        >
+          <div className="flex items-center">
+            <DoorClosed className="mr-2 h-4 w-4" />
+            <span className="text-sm text-gray-400">My rooms</span>
+          </div>
+          <p className="animate-pulse text-xs text-purple-500">Soon</p>
         </DropdownMenuItem>
+        <DropdownMenuSeparator className="h-px bg-border" />
         <DropdownMenuItem onClick={() => signOut()}>
           <LogOut className="mr-2 h-4 w-4" />
           Logout

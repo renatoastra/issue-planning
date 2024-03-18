@@ -12,8 +12,8 @@ export const roomRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
-        title: z.string(),
-        link: z.string(),
+        title: z.string().optional(),
+        link: z.string().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -22,7 +22,7 @@ export const roomRouter = createTRPCRouter({
       try {
         const query = await ctx.db.room.create({
           data: {
-            link,
+            link: link,
             title,
             status: ROOM_STATUS.VOTING,
             user: { connect: { id: ctx.session.user.id } },
