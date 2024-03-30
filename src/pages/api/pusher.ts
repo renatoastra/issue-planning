@@ -1,6 +1,5 @@
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { pusher } from "@/libs/pusher/server";
-import { PrismaClient } from "@prisma/client";
 import { prisma } from "@/server/db";
 
 type ChannelAuth = {

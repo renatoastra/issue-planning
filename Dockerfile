@@ -27,10 +27,6 @@ COPY . .
 # Uncomment the following line in case you want to disable telemetry during the build.
 # ENV NEXT_TELEMETRY_DISABLED 1
 
-RUN npm run postinstall && npm run build
-FROM base AS runner
-WORKDIR /app
-
 ARG DATABASE_URL
 ENV DATABASE_URL=$DATABASE_URL
 
@@ -65,6 +61,12 @@ ENV DISCORD_CLIENT_ID=$DISCORD_CLIENT_ID
 
 ARG DISCORD_CLIENT_SECRET
 ENV DISCORD_CLIENT_SECRET=$DISCORD_CLIENT_SECRET
+
+RUN npm run postinstall && npm run build
+FROM base AS runner
+WORKDIR /app
+
+
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
