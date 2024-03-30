@@ -4,20 +4,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      environment:
-        - DATABASE_URL=postgres://admin:uTfDRzTIuzMVexUqtPVStLecBIEI1O2F@dpg-co49d1779t8c7390aocg-a.oregon-postgres.render.com/planning_db_kxy7
-        - NEXTAUTH_URL=http://localhost:3000
-        - DISCORD_CLIENT_ID=1167195127522021376
-        - DISCORD_CLIENT_SECRET=ejn8xgn5A7kdfPreBe-MtlmHWvG-iJ_T
-        - SOKETI_DEFAULT_APP_ID=app-id
-        - SOKETI_DEFAULT_APP_SECRET=app-secret
-        - SOKETI_DEFAULT_APP_KEY=app-key
-        - NEXT_PUBLIC_PUSHER_APP_KEY=app-key
-        - NEXT_PUBLIC_PUSHER_KEY=app-key
-        - NEXT_PUBLIC_SOKETI_URL=soketi
-        - NEXT_PUBLIC_SOKETI_PORT=6001
-        - NEXT_PUBLIC_SOKETI_CLUSTER=""
-        - NEXTAUTH_SECRET=xesquedeleking
     ports:
       - "3000:3000"
   soketi:

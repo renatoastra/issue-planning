@@ -27,14 +27,7 @@ COPY . .
 # Uncomment the following line in case you want to disable telemetry during the build.
 # ENV NEXT_TELEMETRY_DISABLED 1
 
-RUN \
-  if [ -f yarn.lock ]; then yarn run build; \
-  elif [ -f package-lock.json ]; then npm run postinstall && npm run build; \
-  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
-
-# Production image, copy all the files and run next
+RUN npm run postinstall && npm run build
 FROM base AS runner
 WORKDIR /app
 ENV DATABASE_URL='postgresql://planning_owner:Q4VkhlG9BAEb@ep-super-sound-a5iouira.us-east-2.aws.neon.tech/planning?sslmode=require'
