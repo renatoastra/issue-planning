@@ -17,6 +17,7 @@ import { useTimer } from "../use-timer/useTimer";
 import { useRouter } from "next/router";
 import { RoomContext } from "@/context/room-data";
 import { RoomApiContext } from "@/context/room-data/fetch";
+import { type GetResult } from "@/types/room-procedure-output";
 
 Pusher.logToConsole = false;
 interface UsePusherProps {
@@ -131,6 +132,8 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
       pusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY!, {
         cluster: process.env.NEXT_PUBLIC_SOKETI_CLUSTER!,
         forceTLS: false,
+        wsHost: "localhost",
+        wsPort: 6001,
         enabledTransports: ["ws", "wss"],
         authEndpoint: "/api/pusher",
         userAuthentication: {
@@ -149,11 +152,13 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
             id: data.user.id,
             image: data.user.image,
             voted:
-              dbData?.users?.find((user) => user.id === data.user.id)?.voted ??
-              false,
+              dbData?.users?.find(
+                (user: GetResult[0]) => user.id === data.user.id,
+              )?.voted ?? false,
             choose:
-              dbData?.users?.find((user) => user.id === data.user.id)?.choose ??
-              null,
+              dbData?.users?.find(
+                (user: GetResult[0]) => user.id === data.user.id,
+              )?.choose ?? null,
           },
         },
       });
@@ -180,7 +185,9 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
           .map((user) => {
             if (!dbData) return user;
 
-            const userVoted = dbData?.users?.find((v) => v.id === user.id);
+            const userVoted = dbData?.users?.find(
+              (v: GetResult[0]) => v.id === user.id,
+            );
             if (!userVoted) return user;
 
             return userVoted;

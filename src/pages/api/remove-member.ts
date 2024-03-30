@@ -1,6 +1,7 @@
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { pusher } from "@/libs/pusher/server";
 import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/server/db";
 
 type RequestBodyPusher = {
   roomId: string;
@@ -23,7 +24,6 @@ export default async function handler(
       message: "You have been removed from the room",
     });
 
-    const prisma = new PrismaClient();
     await prisma.room.update({
       where: {
         id: roomId,

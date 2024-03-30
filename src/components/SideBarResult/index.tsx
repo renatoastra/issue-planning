@@ -16,7 +16,7 @@ export const SideBarVoteResult = ({
   voteValue,
 }: SideBarVoteResultProps) => {
   const getVoteByValue = (value: string, users: GetResult | undefined) => {
-    return users?.filter((user) => user.choose === value);
+    return users?.filter((user: GetResult[0]) => user.choose === value);
   };
 
   const userArray = getVoteByValue(voteValue, users);
@@ -39,7 +39,7 @@ export const SideBarVoteResult = ({
       </h3>
       {userArray &&
         userArray?.length > 0 &&
-        userArray?.map((user) => {
+        userArray?.map((user: GetResult[0]) => {
           return (
             <>
               <div className="flex items-center justify-between gap-2  p-3  text-sm hover:bg-secondary hover:bg-opacity-95">

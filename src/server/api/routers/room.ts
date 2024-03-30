@@ -20,7 +20,7 @@ export const roomRouter = createTRPCRouter({
       const { link, title } = input;
 
       try {
-        const query = await ctx.db.room.create({
+        const query = await ctx.prisma.room.create({
           data: {
             link: link,
             title,
@@ -41,7 +41,7 @@ export const roomRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
-      return await ctx.db.room.findUnique({
+      return await ctx.prisma.room.findUnique({
         where: {
           id: input.id,
         },
@@ -59,7 +59,7 @@ export const roomRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { roomId, value, userId } = input;
 
-      const hasVote = await ctx.db.votes.findFirst({
+      const hasVote = await ctx.prisma.votes.findFirst({
         where: {
           roomId: roomId,
           userId: userId,
@@ -70,7 +70,7 @@ export const roomRouter = createTRPCRouter({
       });
 
       if (hasVote) {
-        const query = await ctx.db.votes.update({
+        const query = await ctx.prisma.votes.update({
           where: {
             id: hasVote.id,
           },
@@ -85,7 +85,7 @@ export const roomRouter = createTRPCRouter({
         return query;
       }
 
-      const query = await ctx.db.votes.create({
+      const query = await ctx.prisma.votes.create({
         data: {
           value: value,
           room: { connect: { id: roomId } },
@@ -107,7 +107,7 @@ export const roomRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       const { roomId } = input;
-      const query = await ctx.db.votes.findMany({
+      const query = await ctx.prisma.votes.findMany({
         where: {
           roomId: roomId,
         },
@@ -116,7 +116,7 @@ export const roomRouter = createTRPCRouter({
         },
       });
 
-      const users = query.map((vote) => {
+      const users = query.map((vote: (typeof query)[0]) => {
         return {
           id: vote.user.id,
           username: vote.user.name,
@@ -137,7 +137,7 @@ export const roomRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { roomId, status } = input;
 
-      const query = await ctx.db.room.update({
+      const query = await ctx.prisma.room.update({
         where: {
           id: roomId,
         },
@@ -165,7 +165,7 @@ export const roomRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const { roomId, status } = input;
-      const query = await ctx.db.room.update({
+      const query = await ctx.prisma.room.update({
         where: {
           id: roomId,
         },
@@ -182,7 +182,7 @@ export const roomRouter = createTRPCRouter({
         throw new Error("Room not found");
       }
 
-      await ctx.db.votes.deleteMany({
+      await ctx.prisma.votes.deleteMany({
         where: {
           roomId: roomId,
         },
@@ -199,7 +199,7 @@ export const roomRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       const { roomId } = input;
-      const query = await ctx.db.room.findUnique({
+      const query = await ctx.prisma.room.findUnique({
         where: {
           id: roomId,
         },
@@ -215,7 +215,7 @@ export const roomRouter = createTRPCRouter({
         },
       });
 
-      const timer = await ctx.db.room.findUnique({
+      const timer = await ctx.prisma.room.findUnique({
         where: {
           id: roomId,
         },
@@ -224,8 +224,10 @@ export const roomRouter = createTRPCRouter({
         },
       });
       const roomOwner = query?.createdById;
-      const users = query?.users.map((user) => {
-        const vote = query.votes.find((vote) => vote.userId === user.id);
+      const users = query?.users.map((user: (typeof query.users)[0]) => {
+        const vote = query.votes.find(
+          (vote: (typeof query.votes)[0]) => vote.userId === user.id,
+        );
         return {
           id: user.id,
           username: user.name,
@@ -253,7 +255,7 @@ export const roomRouter = createTRPCRouter({
 
       const currentDate = new Date();
       const timerToDate = new Date(currentDate.getTime() + timer * 60 * 1000);
-      const query = await ctx.db.room.update({
+      const query = await ctx.prisma.room.update({
         where: {
           id: roomId,
         },
@@ -278,7 +280,7 @@ export const roomRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { roomId, userId } = input;
 
-      return await ctx.db.room.update({
+      return await ctx.prisma.room.update({
         where: {
           id: roomId,
         },
@@ -298,7 +300,7 @@ export const roomRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { roomId, memberIdToRemove } = input;
       try {
-        await ctx.db.room.update({
+        await ctx.prisma.room.update({
           where: {
             id: roomId,
           },
@@ -339,7 +341,7 @@ export const roomRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const { roomId } = input;
 
-      const query = await ctx.db.votes.findMany({
+      const query = await ctx.prisma.votes.findMany({
         where: {
           roomId: roomId,
         },
@@ -348,7 +350,7 @@ export const roomRouter = createTRPCRouter({
         },
       });
 
-      const users = query.map((vote) => {
+      const users = query.map((vote: (typeof query)[0]) => {
         return {
           id: vote.user.id,
           username: vote.user.name,

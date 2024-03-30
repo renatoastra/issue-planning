@@ -28,8 +28,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     }
     return user;
   });
-
-  console.log("VOTOU");
   try {
     await pusher.trigger(`presence-room-${roomId}`, "vote", {
       username,

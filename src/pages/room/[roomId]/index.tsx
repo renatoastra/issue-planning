@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */
-import { PrismaClient } from "@prisma/client";
 import { RoomContextProvider } from "@/context/room-data";
 import { Room } from "@/views/room";
 import { RoomApiContextProvider } from "@/context/room-data/fetch";
@@ -7,6 +6,7 @@ import { type GetServerSidePropsContext } from "next/types";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { useState } from "react";
+import { prisma } from "@/server/db";
 
 type PageProps = {
   roomId: string;
@@ -21,7 +21,6 @@ export const getServerSideProps = async (
   context: GetServerSidePropsContext,
 ) => {
   const roomId = context.query.roomId;
-  const prisma = new PrismaClient();
   const query = await prisma.room.findFirst({
     where: {
       id: String(roomId),

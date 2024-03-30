@@ -26,7 +26,6 @@ interface RoomProps {
 export const Room = ({ id }: RoomProps) => {
   const { roomId, link, title, step, isLoggedUserAdmin } =
     useContext(RoomContext);
-  console.log("🚀 ~ title:", title);
   const {
     canRevealVote,
     getMyVote,
@@ -150,9 +149,7 @@ export const Room = ({ id }: RoomProps) => {
                           onClick={async () => handleInitTimer(handleTimer)}
                         >
                           <LoadingSpinner
-                            text={
-                              handleTimer > 0 ? "Reset timer" : "Start timer"
-                            }
+                            text={"Start timer "}
                             isLoading={isLoading}
                           />
                         </Button>

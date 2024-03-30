@@ -1,6 +1,7 @@
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { pusher } from "@/libs/pusher/server";
 import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/server/db";
 
 type ChannelAuth = {
   socket_id: string;
@@ -46,8 +47,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (!socket_id || !channel_name)
     return res.status(400).json({ error: "Missing socket_id or channel_name" });
 
-  const prisma = new PrismaClient();
-
   const room = await prisma.room.findUnique({
     where: {
       id: roomId,
@@ -65,7 +64,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (!room) {
     return res.status(404).json({ error: "Room not found" });
   }
-  const hasUser = room.users?.some((user) => user.id === id) ?? false;
+  const hasUser =
+    room.users?.some((user: { id: string }) => user.id === id) ?? false;
 
   if (!hasUser) {
     await prisma.room.update({

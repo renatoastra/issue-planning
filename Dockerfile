@@ -1,37 +1,74 @@
-FROM node:alpine as builder
+FROM node:18-alpine AS base
 
-RUN mkdir -p /home/node/app
-WORKDIR /home/node/app
+# Install dependencies only when needed
+FROM base AS deps
+# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
 
-COPY --chown=node:node ./package.json ./
-RUN npm install --force
-COPY --chown=node:node ./ ./
+# Install dependencies based on the preferred package manager
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
+RUN \
+  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
+  elif [ -f package-lock.json ]; then npm ci; \
+  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
+  else echo "Lockfile not found." && exit 1; \
+  fi
 
+
+# Rebuild the source code only when needed
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-RUN npx prisma generate
+# Next.js collects completely anonymous telemetry data about general usage.
+# Learn more here: https://nextjs.org/telemetry
+# Uncomment the following line in case you want to disable telemetry during the build.
+# ENV NEXT_TELEMETRY_DISABLED 1
 
-ENV DATABASE_URL="postgresql://admin:postgres@duozada-db/duozada?schema=public"
-ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_ZXhhY3QtbWFybGluLTQ4LmNsZXJrLmFjY291bnRzLmRldiQ
-ENV CLERK_SECRET_KEY=sk_test_VALDwhTTaZ1rfdNJQwLOuiLh4SGewvkyvJM2b6mxjI
-ENV NODE_ENV="production"
-ENV PUBLIC_AWS_KEY=AKIATWLWLOJNS4ZGL3VX
-ENV SECRET_AWS_KEY=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
-ENV BASE_URL=https://issue-planning.vercel.app/
-ENV S3_UPLOAD_REGION=sa-east-1
-ENV VERCEL_URL=https://issue-planning.vercel.app/
-ENV SOKETI_DEFAULT_APP_ID=issue-planing
-ENV SOKETI_DEFAULT_APP_SECRET=6shiidf3t9im3loqx5u0uwrieaav7ak4
-ENV SOKETI_DEFAULT_APP_KEY=z8hxd1e3kb69q2sql188vhsjk8yhgs7w
+RUN \
+  if [ -f yarn.lock ]; then yarn run build; \
+  elif [ -f package-lock.json ]; then npm run postinstall && npm run build; \
+  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build; \
+  else echo "Lockfile not found." && exit 1; \
+  fi
 
-ENV NEXT_PUBLIC_SOKETI_CLUSTER=
-ENV NEXT_PUBLIC_PUSHER_APP_KEY=z8hxd1e3kb69q2sql188vhsjk8yhgs7w
-ENV NEXT_PUBLIC_PUSHER_KEY=z8hxd1e3kb69q2sql188vhsjk8yhgs7w
-ENV NEXT_PUBLIC_SOKETI_URL=soketi-production-f9f5.up.railway.app
+# Production image, copy all the files and run next
+FROM base AS runner
+WORKDIR /app
+ENV DATABASE_URL='postgresql://planning_owner:Q4VkhlG9BAEb@ep-super-sound-a5iouira.us-east-2.aws.neon.tech/planning?sslmode=require'
+ENV NODE_ENV production
+ENV SOKETI_DEFAULT_APP_ID=app-id
+ENV SOKETI_DEFAULT_APP_SECRET=app-secret
+ENV SOKETI_DEFAULT_APP_KEY=app-key
+ENV NEXT_PUBLIC_PUSHER_APP_KEY=app-key
+ENV NEXT_PUBLIC_PUSHER_KEY=app-key
+ENV NEXT_PUBLIC_SOKETI_URL=localhost
 ENV NEXT_PUBLIC_SOKETI_PORT=6001
-ENV SOKETI_DEBUG=1
+ENV NEXT_PUBLIC_SOKETI_CLUSTER=""
+ENV NEXTAUTH_SECRET="xesquedeleking"
 
-RUN npm run build
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
 
-FROM nginx
-COPY --from=builder /home/node/app/.next /usr/share/nginx/html
+COPY --from=builder /app/public ./public
+
+# Set the correct permission for prerender cache
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
+
+# Automatically leverage output traces to reduce image size
+# https://nextjs.org/docs/advanced-features/output-file-tracing
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT 3000
+ENV HOSTNAME="0.0.0.0"
+# server.js is created by next build from the standalone output
+# https://nextjs.org/docs/pages/api-reference/next-config-js/output
+CMD ["node", "server.js"]

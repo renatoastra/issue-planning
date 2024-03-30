@@ -1,7 +1,7 @@
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { pusher } from "@/libs/pusher/server";
 import { type UsersInRoom } from "@/types/users-in-room";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/server/db";
 
 export type RequestBodyPusher = {
   roomId: string;
@@ -14,7 +14,6 @@ export default async function handler(
   if (req.method !== "POST") return res.status(405).end();
 
   const { roomId, users } = req.body as RequestBodyPusher;
-  const prisma = new PrismaClient();
   try {
     await pusher.trigger(`presence-room-${roomId}`, "close-room", {
       roomId,
