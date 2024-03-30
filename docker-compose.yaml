@@ -10,15 +10,3 @@ services:
     image: "quay.io/soketi/soketi:latest-16-alpine"
     ports:
       - "6001:6001"
-  db:
-    image: postgres
-    environment:
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=6172c46d6baa82e944675da236e6a059
-      - POSTGRES_DB=planning-db
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-volumes:
-  pgdata:
