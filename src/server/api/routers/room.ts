@@ -53,16 +53,15 @@ export const roomRouter = createTRPCRouter({
       z.object({
         roomId: z.string(),
         value: z.string(),
-        userId: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { roomId, value, userId } = input;
+      const { roomId, value } = input;
 
       const hasVote = await ctx.prisma.votes.findFirst({
         where: {
           roomId: roomId,
-          userId: userId,
+          userId: ctx.session.user.id,
         },
         select: {
           id: true,
@@ -89,7 +88,7 @@ export const roomRouter = createTRPCRouter({
         data: {
           value: value,
           room: { connect: { id: roomId } },
-          user: { connect: { id: userId } },
+          user: { connect: { id: ctx.session.user.id } },
         },
         select: {
           id: true,
@@ -132,23 +131,16 @@ export const roomRouter = createTRPCRouter({
       z.object({
         roomId: z.string(),
         status: z.string(),
-        votes: z.array(z.object({ userId: z.string(), value: z.string() })),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const { roomId, status } = input;
-
       const query = await ctx.prisma.room.update({
         where: {
           id: roomId,
         },
         data: {
           status,
-          votes: {
-            createMany: {
-              data: input.votes,
-            },
-          },
         },
         select: {
           status: true,

@@ -98,17 +98,9 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
     try {
       setIsLoading(true);
 
-      const votes = usersInRoom.map((user) => {
-        return {
-          userId: user.id,
-          value: user.choose ?? "",
-        };
-      });
-      console.log("🚀 ~ votes:", votes);
       await onRevealRoom({
         roomId,
         status: ROOM_STATUS.VOTED,
-        votes: votes,
       });
       const payload = {
         roomId: roomId,
@@ -305,7 +297,6 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
   const handleCreateVote = async (choose: string) => {
     if (cardIsLoading) return;
     try {
-      if (!data?.user.id) return;
       setCardIsLoading(true);
 
       const payload = {
@@ -322,6 +313,11 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
+      });
+
+      await onInsertVote({
+        roomId,
+        value: choose,
       });
     } catch (error) {
       console.log(error);
