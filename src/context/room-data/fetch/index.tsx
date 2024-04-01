@@ -1,4 +1,4 @@
-import { createContext } from "react";
+import { createContext, useState } from "react";
 import { type RoomApiProviderProps, type RoomApiContextProps } from "./types";
 import { useFetchRoomData } from "@/hooks/use-fetch-room-data";
 
@@ -14,6 +14,8 @@ const RoomApiContextProvider = ({ roomId, children }: RoomApiProviderProps) => {
     onSetTimer,
     roomData,
     getRoom,
+    isLoadingRoomQueries,
+    isMutatingOnResetRoom,
   } = useFetchRoomData({ roomId: roomId });
 
   return (
@@ -27,6 +29,8 @@ const RoomApiContextProvider = ({ roomId, children }: RoomApiProviderProps) => {
         onSetTimer,
         roomData,
         getRoom,
+        isLoadingRoomQueries,
+        isMutatingOnResetRoom,
       }}
     >
       {children}

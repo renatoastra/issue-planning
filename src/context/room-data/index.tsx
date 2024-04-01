@@ -14,11 +14,18 @@ export const RoomContextProvider = ({
   title,
 }: RoomProviderProps) => {
   const [step, setStep] = useState<ROOM_STATUS>(ROOM_STATUS.VOTING);
+  const [sideBarIsLoading, setSideBarIsLoading] = useState(false);
+
   const [usersInRoom, setUsersInRoom] = useState<UsersInRoom[]>([]);
   const { data } = useSession();
   const isLoggedUserAdmin = roomOwnerId === data?.user.id;
 
   const labels = ["PP", "P", "M", "G", "GG", "🍆"];
+
+  const loading = {
+    sideBarIsLoading,
+    setSideBarIsLoading,
+  };
   return (
     <RoomContext.Provider
       value={{
@@ -32,6 +39,7 @@ export const RoomContextProvider = ({
         link,
         isLoggedUserAdmin,
         labels,
+        loading,
       }}
     >
       {children}

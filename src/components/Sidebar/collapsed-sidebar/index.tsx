@@ -1,5 +1,6 @@
 import { UserAvatar } from "@/components/Avatar";
 import { RemoveUserDropDown } from "@/components/RemoveUserDropDown";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ROOM_STATUS } from "@/enum/status";
 import { useUserSidebar } from "@/hooks/use-user-sidebar/useUserSidebar";
 import clsx from "clsx";
@@ -10,16 +11,9 @@ interface CollapsedSidebarProps {
   cycleOpen: () => void;
 }
 export const CollapsedSidebar = ({ cycleOpen }: CollapsedSidebarProps) => {
-  const {
-    getVoteResult,
-    isLoggedUserAdmin,
-    labels,
-    roomOwnerId,
-    usersInRoom,
-    step,
-    setOpen,
-  } = useUserSidebar();
-
+  const { isLoggedUserAdmin, roomOwnerId, usersInRoom, step, loading } =
+    useUserSidebar();
+  const { sideBarIsLoading } = loading;
   return (
     <motion.aside
       key={"collapsed"}
@@ -45,33 +39,50 @@ export const CollapsedSidebar = ({ cycleOpen }: CollapsedSidebarProps) => {
             <button onClick={cycleOpen} className="px-3">
               <ArrowLeft size={24} />
             </button>
-            {step === ROOM_STATUS.VOTING &&
-              usersInRoom?.map((user) => (
-                <RemoveUserDropDown
-                  roomId={roomOwnerId}
-                  userId={user.id}
-                  isRoomOwner={isLoggedUserAdmin}
-                  key={user.id + "collapsed"}
+            {sideBarIsLoading ? (
+              <div className="flex items-center justify-center   hover:bg-secondary hover:bg-opacity-95">
+                <motion.div
+                  className="flex flex-col gap-4 rounded-full "
+                  transition={{ duration: 1 }}
                 >
-                  <div className="flex items-center justify-center   hover:bg-secondary hover:bg-opacity-95">
-                    <motion.div
-                      className="flex rounded-full "
-                      animate={{
-                        borderColor: user.voted ? "#22C55E" : "#EF4444",
-                        borderWidth: 2,
-                      }}
-                      initial={{ borderColor: "#fff", borderWidth: 2 }}
-                      transition={{ duration: 1 }}
+                  <Skeleton className="h-11 w-11 rounded-full border-2" />
+                  <Skeleton className="h-11 w-11 rounded-full border-2" />
+                  <Skeleton className="h-11 w-11 rounded-full border-2" />
+                  <Skeleton className="h-11 w-11 rounded-full border-2" />
+                  <Skeleton className="h-11 w-11 rounded-full border-2" />
+                </motion.div>
+              </div>
+            ) : (
+              <>
+                {step === ROOM_STATUS.VOTING &&
+                  usersInRoom?.map((user) => (
+                    <RemoveUserDropDown
+                      roomId={roomOwnerId}
+                      userId={user.id}
+                      isRoomOwner={isLoggedUserAdmin}
+                      key={user.id + "collapsed"}
                     >
-                      <UserAvatar
-                        src={user?.user_image_url ?? ""}
-                        fallback={user?.username ?? ""}
-                        className={clsx(`h-11 w-11 border-2`)}
-                      />
-                    </motion.div>
-                  </div>
-                </RemoveUserDropDown>
-              ))}
+                      <div className="flex items-center justify-center   hover:bg-secondary hover:bg-opacity-95">
+                        <motion.div
+                          className="flex rounded-full "
+                          animate={{
+                            borderColor: user.voted ? "#22C55E" : "#EF4444",
+                            borderWidth: 2,
+                          }}
+                          initial={{ borderColor: "#fff", borderWidth: 2 }}
+                          transition={{ duration: 1 }}
+                        >
+                          <UserAvatar
+                            src={user?.user_image_url ?? ""}
+                            fallback={user?.username ?? ""}
+                            className={clsx(`h-11 w-11 border-2`)}
+                          />
+                        </motion.div>
+                      </div>
+                    </RemoveUserDropDown>
+                  ))}
+              </>
+            )}
           </div>
         </motion.div>
       )}

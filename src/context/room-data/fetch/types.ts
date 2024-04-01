@@ -18,6 +18,8 @@ interface RoomApiContextProps {
   onSetTimer: OnSetTimer;
   roomData: RoomData;
   getRoom: GetRoom;
+  isLoadingRoomQueries: boolean;
+  isMutatingOnResetRoom: boolean;
 }
 
 interface RoomApiProviderProps {

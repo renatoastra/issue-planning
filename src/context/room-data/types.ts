@@ -13,6 +13,10 @@ interface RoomContextProps {
   setStep: Dispatch<SetStateAction<ROOM_STATUS>>;
   isLoggedUserAdmin: boolean;
   labels: string[];
+  loading: {
+    sideBarIsLoading: boolean;
+    setSideBarIsLoading: (value: boolean) => void;
+  };
 }
 
 interface RoomProviderProps {

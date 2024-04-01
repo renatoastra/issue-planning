@@ -132,6 +132,7 @@ export const roomRouter = createTRPCRouter({
       z.object({
         roomId: z.string(),
         status: z.string(),
+        votes: z.array(z.object({ userId: z.string(), value: z.string() })),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -143,6 +144,11 @@ export const roomRouter = createTRPCRouter({
         },
         data: {
           status,
+          votes: {
+            createMany: {
+              data: input.votes,
+            },
+          },
         },
         select: {
           status: true,

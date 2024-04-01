@@ -29,12 +29,12 @@ const sideVariants = {
 
 export const UserSideBar = () => {
   const {
-    getVoteResult,
     isLoggedUserAdmin,
     labels,
     roomOwnerId,
     usersInRoom,
     step,
+    getVoteResult,
   } = useUserSidebar();
   const [open, cycleOpen] = useCycle(false, true);
 

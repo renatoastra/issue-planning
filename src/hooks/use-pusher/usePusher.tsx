@@ -28,7 +28,7 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
   const pusherRef = useRef<Pusher>();
   const { data } = useSession();
   const router = useRouter();
-  const { setUsersInRoom, usersInRoom, setStep, step } =
+  const { setUsersInRoom, usersInRoom, setStep, step, loading } =
     useContext(RoomContext);
 
   const {
@@ -45,6 +45,7 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [cardIsLoading, setCardIsLoading] = useState(false);
+  const { setSideBarIsLoading } = loading;
 
   const getMyVote = usersInRoom.find((user) => user?.id === data?.user.id);
   const pusher = pusherRef.current;
@@ -97,9 +98,17 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
     try {
       setIsLoading(true);
 
+      const votes = usersInRoom.map((user) => {
+        return {
+          userId: user.id,
+          value: user.choose ?? "",
+        };
+      });
+      console.log("🚀 ~ votes:", votes);
       await onRevealRoom({
         roomId,
         status: ROOM_STATUS.VOTED,
+        votes: votes,
       });
       const payload = {
         roomId: roomId,
@@ -119,7 +128,10 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
   };
 
   useEffect(() => {
-    if (!data?.user.id) return;
+    if (!data?.user.id) {
+      setSideBarIsLoading(true);
+      return;
+    }
     let mounted = true;
     const timer = roomData?.timer ?? 0;
     const users = roomData?.users ?? [];
@@ -163,8 +175,9 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
         },
       });
     }
-    if (!pusherRef.current) return;
-
+    if (!pusherRef.current) {
+      return;
+    }
     const channel = pusherRef.current.subscribe(`presence-room-${roomId}`);
     const userChannel = pusherRef.current.subscribe(
       `presence-user-${data.user.id}`,
@@ -204,7 +217,7 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
           localDate > currentDate
             ? Math.floor((localDate.getTime() - currentDate.getTime()) / 1000)
             : 0;
-
+        setSideBarIsLoading(false);
         setUsersInRoom(users);
         setTimer(timer);
       },
@@ -245,7 +258,6 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
         users,
         timer: 0,
       };
-      localStorage.setItem(`${roomId}-vote`, JSON.stringify(data));
       setUsersInRoom(users);
       setStep(ROOM_STATUS.VOTED);
     });
@@ -295,11 +307,7 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
     try {
       if (!data?.user.id) return;
       setCardIsLoading(true);
-      await onInsertVote({
-        roomId,
-        value: choose,
-        userId: data?.user.id,
-      });
+
       const payload = {
         id: data?.user.id,
         username: data?.user.name,

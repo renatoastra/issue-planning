@@ -4,8 +4,15 @@ import { useContext, useState } from "react";
 import { RoomContext } from "@/context/room-data";
 
 export const useUserSidebar = () => {
-  const { step, roomId, usersInRoom, roomOwnerId, isLoggedUserAdmin, labels } =
-    useContext(RoomContext);
+  const {
+    step,
+    roomId,
+    usersInRoom,
+    roomOwnerId,
+    isLoggedUserAdmin,
+    labels,
+    loading,
+  } = useContext(RoomContext);
   const { data: getVoteResult } = api.room.getResult.useQuery(
     { roomId },
     { enabled: step === ROOM_STATUS.VOTED },
@@ -20,5 +27,6 @@ export const useUserSidebar = () => {
     step,
     open,
     setOpen,
+    loading,
   };
 };
