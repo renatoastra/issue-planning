@@ -1,4 +1,4 @@
-import { ResultChart } from "@/components/Charts/Vertical";
+import { BarChartResult } from "@/components/bar-chart";
 import { api } from "@/utils/api";
 
 import { useCallback } from "react";
@@ -9,7 +9,7 @@ interface VotedSectionProps {
 export const VotedSection = ({ roomId }: VotedSectionProps) => {
   const { data: result } = api.room.getResult.useQuery({ roomId });
   const Result = useCallback(() => {
-    return <ResultChart result={result} />;
+    return <BarChartResult result={result} />;
   }, [result]);
   return Result();
 };

@@ -186,21 +186,16 @@ export const usePusher = ({ roomId }: UsePusherProps) => {
           members.members,
         ) as unknown as UsersInRoom[];
 
-        const users = userResponse
-          .map((user) => {
-            if (!dbData) return user;
+        const users = userResponse.map((user) => {
+          if (!dbData) return user;
 
-            const userVoted = dbData?.users?.find(
-              (v: GetResult[0]) => v.id === user.id,
-            );
-            if (!userVoted) return user;
+          const userVoted = dbData?.users?.find(
+            (v: GetResult[0]) => v.id === user.id,
+          );
+          if (!userVoted) return user;
 
-            return userVoted;
-          })
-          .sort((a, b) => {
-            if (!a.username || !b.username) return 0;
-            return a.username.localeCompare(b.username);
-          });
+          return userVoted;
+        });
 
         const localDate = new Date(dbData?.timer ?? 0);
         const currentDate = new Date();
