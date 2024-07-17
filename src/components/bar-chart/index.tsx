@@ -39,7 +39,6 @@ export function BarChartResult({ result }: BarChartResultProps) {
       quantity: result?.filter((user: UsersInRoom) => user.choose === p).length,
     }));
   };
-  console.log("🚀 ~ getVotesByType:", getVotesByType());
 
   return (
     <Card className="mt-6 w-full">
